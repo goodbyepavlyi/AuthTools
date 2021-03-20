@@ -30,8 +30,6 @@ typing commands or using the inventory.
   <li><strong>Add Maximum registration & Maximum connection with one IP</strong>.</li>
   <li><strong>Remove join & leave messages if player doesn't log in</strong>.</li>
   <li><strong>Add "/authtools import" command that allows you to import data from another backends to active one</strong>.</li>
-  <li><strong>In-Game QR Code for Authenticator App</strong>.</li>
-  <li><strong>Recovery codes for players</strong>.</li>
 </ul>
 
 #### Configuration
