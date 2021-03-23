@@ -12,7 +12,7 @@ typing commands or using the inventory.
 <ul>
   <li><strong>Disables the an "Logged in from another location" kick</strong>.</li>
   <li><strong>Fully customizable messages</strong>.</li>
-  <li><strong>YAML, MySQL and SQLite Backend support</strong>.</li>
+  <li><strong>YAML, MySQL, SQLite and MongoDB backend support</strong>.</li>
   <li><strong>Cached database queries</strong>.</li>
   <li><strong>Shows a realtime info about user</strong>.</li>
   <li><strong>Spawn & Lobby location</strong>.</li>
