@@ -1,6 +1,6 @@
 ###################################
 #                                 #
-#   AuthTools v1.0                #
+#   AuthTools v1.1                #
 #                                 #
 #   Author: Pavlyi                #
 #   Website: http://pavlyi.eu     #
@@ -31,6 +31,12 @@ connection:
     sqlite:
         # SQLite file name
         fileName: sqlite.db
+    
+    mongodb:
+        cluster: cluster
+        database: database
+        username: username
+        password: password
 
 settings:
     # Should we hook into AuthMe?

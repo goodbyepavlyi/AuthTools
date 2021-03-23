@@ -10,9 +10,12 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Damageable;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.PlayerLeashEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -198,13 +201,25 @@ public class PlayerLoginListener implements Listener {
 		}
 		
 	}
-
+	
 	@EventHandler
 	public void disableArmorStandManipulate(PlayerArmorStandManipulateEvent e) {
 		Player p = e.getPlayer();
 		
 		if (instance.getAuthLocked().contains(p.getName())) {
 			e.setCancelled(true);
+		}
+		
+	}
+
+	@EventHandler
+	public void disableDamage(EntityDamageEvent e) {
+		if (e.getEntityType().equals(EntityType.PLAYER)) {
+			Player p = (Player) e.getEntity();
+			
+			if (instance.getAuthLocked().contains(p.getName())) {
+				e.setCancelled(true);
+			}
 		}
 		
 	}

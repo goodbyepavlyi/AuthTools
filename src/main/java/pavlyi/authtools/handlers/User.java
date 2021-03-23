@@ -8,8 +8,14 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
 
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 import pavlyi.authtools.AuthTools;
 
@@ -51,7 +57,26 @@ public class User {
 		this.recoveryCode = getRecoveryCode();
 		this.settingUp2FA = getSettingUp2FA();
 	}
-	
+
+
+	public void create() {
+		if (instance.getConnectionType().equals("MONGODB")) {
+			if (!isInDatabase()) {
+				Document document = new Document("name", name);
+
+				document.append("uuid", null);
+				document.append("email", null);
+				document.append("ip", null);
+				document.append("2fa", false);
+				document.append("2faSecret", null);
+				document.append("2faRecoveryCode", null);
+				document.append("2faSettingUp", false);
+
+				instance.getMongoDB().getCollection().insertOne(document);
+			}
+		}
+	}
+
 	public void setEmail(String email) {
 		if (instance.getConnectionType().equals("YAML")) {
 			instance.getYamlConnection().getPlayerData().set(name+".email", email);
@@ -70,14 +95,29 @@ public class User {
 			
 			this.email = email;
 		}
-
+		
 		if (instance.getConnectionType().equals("SQLITE")) {
 			if (!isInDatabase()) {
 				instance.getSQLite().update("INSERT INTO authtools (name, email) VALUES ('"+name+"', '"+email+"');");
 				return;
 			}
-
+			
 			instance.getSQLite().update("UPDATE authtools SET email='"+email+"' WHERE name='"+name+"';");
+			
+			this.email = email;
+		}
+		
+		if (instance.getConnectionType().equals("MONGODB")) {
+			create();
+
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				Bson updatedValue = new Document("email", email);
+				Bson updateOperation = new Document("$set", updatedValue);
+
+				instance.getMongoDB().getCollection().updateOne(found, updateOperation); 
+			}
 
 			this.email = email;
 		}
@@ -122,6 +162,21 @@ public class User {
 
 			this.TFA = TFA;
 		}
+		
+		if (instance.getConnectionType().equals("MONGODB")) {
+			create();
+
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				Bson updatedValue = new Document("2fa", TFA);
+				Bson updateOperation = new Document("$set", updatedValue);
+
+				instance.getMongoDB().getCollection().updateOne(found, updateOperation); 
+			}
+
+			this.TFA = TFA;
+		}
 	}
 	
 	public void set2FAsecret(String TFAsecret) {
@@ -150,6 +205,21 @@ public class User {
 			}
 
 			instance.getSQLite().update("UPDATE authtools SET tfaSecret='"+TFAsecret+"' WHERE name='"+name+"';");
+
+			this.TFAsecret = TFAsecret;
+		}
+		
+		if (instance.getConnectionType().equals("MONGODB")) {
+			create();
+
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				Bson updatedValue = new Document("2faSecret", TFAsecret);
+				Bson updateOperation = new Document("$set", updatedValue);
+
+				instance.getMongoDB().getCollection().updateOne(found, updateOperation); 
+			}
 
 			this.TFAsecret = TFAsecret;
 		}
@@ -189,6 +259,21 @@ public class User {
 				instance.getSQLite().update("UPDATE authtools SET tfaSettingUp="+1+" WHERE name='"+name+"';");
 			} else {
 				instance.getSQLite().update("UPDATE authtools SET tfaSettingUp="+0+" WHERE name='"+name+"';");
+			}
+
+			this.settingUp2FA = settingUp2FA;
+		}
+		
+		if (instance.getConnectionType().equals("MONGODB")) {
+			create();
+
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				Bson updatedValue = new Document("2faSettingUp", settingUp2FA);
+				Bson updateOperation = new Document("$set", updatedValue);
+
+				instance.getMongoDB().getCollection().updateOne(found, updateOperation); 
 			}
 
 			this.settingUp2FA = settingUp2FA;
@@ -281,6 +366,31 @@ public class User {
 				this.recoveryCode = 0;
 			}
 		}
+
+		if (instance.getConnectionType().equals("MONGODB")) {
+			String recoveryCode = "";
+
+			if (!clearRecoveryCode) {
+				recoveryCode = "";
+				
+				for (int i = 1; i <= 8; i++) {
+					recoveryCode = recoveryCode + new Random().nextInt(9);
+				}
+				
+				this.recoveryCode = Integer.parseInt(recoveryCode);
+			} else {
+				this.recoveryCode = 0;
+			}
+
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				Bson updatedValue = new Document("2faRecoveryCode", recoveryCode);
+				Bson updateOperation = new Document("$set", updatedValue);
+
+				instance.getMongoDB().getCollection().updateOne(found, updateOperation); 
+			}
+		}
 	}
 	
 	public void setIP(InetSocketAddress ip) {
@@ -309,8 +419,21 @@ public class User {
 				instance.getSQLite().update("INSERT INTO authtools (name, ip) VALUES ('"+name+"', '"+ipEdited+"');");
 				return;
 			}
-
+			
 			instance.getSQLite().update("UPDATE authtools SET ip='"+ipEdited+"' WHERE name='"+name+"';");
+			
+			this.ip = ipEdited;
+		}
+
+		if (instance.getConnectionType().equals("MONGODB")) {
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				Bson updatedValue = new Document("ip", ipEdited);
+				Bson updateOperation = new Document("$set", updatedValue);
+
+				instance.getMongoDB().getCollection().updateOne(found, updateOperation); 
+			}
 
 			this.ip = ipEdited;
 		}
@@ -345,6 +468,19 @@ public class User {
 
 			this.uuid = player.getUniqueId().toString();
 		}
+
+		if (instance.getConnectionType().equals("MONGODB")) {
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				Bson updatedValue = new Document("uuid", player.getUniqueId().toString());
+				Bson updateOperation = new Document("$set", updatedValue);
+
+				instance.getMongoDB().getCollection().updateOne(found, updateOperation); 
+			}
+
+			this.uuid = player.getUniqueId().toString();
+		}
 	}
 
 
@@ -370,7 +506,7 @@ public class User {
 				return false;
 			}
 		}
-
+		
 		if (instance.getConnectionType().equals("SQLITE")) {
 			try {
 				ResultSet rs = instance.getSQLite().getResult("SELECT * FROM authtools WHERE name='"+getName()+"'");
@@ -384,6 +520,16 @@ public class User {
 				ex.printStackTrace();
 				return false;
 			}
+		}
+
+		if (instance.getConnectionType().equals("MONGODB")) {
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				return true;
+			}
+
+			return false;
 		}
 
 		return false;
@@ -432,6 +578,16 @@ public class User {
 			}
 		}
 
+		if (instance.getConnectionType().equals("MONGODB")) {
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				return found.getString("email");
+			}
+
+			return null;
+		}
+
 		return null;
 	}
 
@@ -470,6 +626,16 @@ public class User {
 				ex.printStackTrace();
 				return false;
 			}
+		}
+
+		if (instance.getConnectionType().equals("MONGODB")) {
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				return (boolean) found.getBoolean("2fa");
+			}
+
+			return false;
 		}
 
 		return false;
@@ -512,6 +678,16 @@ public class User {
 			}
 		}
 
+		if (instance.getConnectionType().equals("MONGODB")) {
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				return found.getString("2faSecret");
+			}
+
+			return null;
+		}
+
 		return null;
 	}
 	
@@ -550,6 +726,16 @@ public class User {
 				ex.printStackTrace();
 				return false;
 			}
+		}
+
+		if (instance.getConnectionType().equals("MONGODB")) {
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				return found.getBoolean("2faSettingUp");
+			}
+
+			return false;
 		}
 		
 		return false;
@@ -591,6 +777,20 @@ public class User {
 				return 0;
 			}
 		}
+
+		if (instance.getConnectionType().equals("MONGODB")) {
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				try {
+					return Integer.parseInt(found.getString("2faRecoveryCode"));
+				} catch (NumberFormatException ex) {
+					return 0;
+				}
+			}
+
+			return 0;
+		}
 		
 		return 0;
 	}
@@ -631,6 +831,16 @@ public class User {
 				return null;
 			}
 		}
+
+		if (instance.getConnectionType().equals("MONGODB")) {
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				return found.getString("ip");
+			}
+
+			return null;
+		}
 		
 		return null;
 	}
@@ -670,6 +880,16 @@ public class User {
 				ex.printStackTrace();
 				return null;
 			}
+		}
+
+		if (instance.getConnectionType().equals("MONGODB")) {
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				return found.getString("uuid");
+			}
+
+			return null;
 		}
 		
 		return null;
@@ -712,6 +932,17 @@ public class User {
 			}
 		}
 
+		if (instance.getConnectionType().equals("MONGODB")) {
+			Document found = (Document) instance.getMongoDB().getCollection().find(new Document("name", name)).first();
+
+			if (found != null) {
+				return found.getString("name");
+			}
+
+			return null;
+		}
+
 		return null;
 	}
+
 }

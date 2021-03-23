@@ -8,12 +8,19 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Scanner;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.map.MapRenderer;
+import org.bukkit.map.MapView;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jsoup.Jsoup;
@@ -22,14 +29,18 @@ import org.jsoup.nodes.Element;
 
 import com.google.common.collect.Sets.SetView;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
+import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 
 import pavlyi.authtools.commands.AuthToolsCommand;
 import pavlyi.authtools.commands.TFACommand;
+import pavlyi.authtools.connections.MongoDB;
 import pavlyi.authtools.connections.MySQL;
 import pavlyi.authtools.connections.SQLite;
 import pavlyi.authtools.connections.YAMLConnection;
 import pavlyi.authtools.handlers.ConfigHandler;
+import pavlyi.authtools.handlers.ImageRenderer;
 import pavlyi.authtools.handlers.MessagesHandler;
+import pavlyi.authtools.handlers.QRCreate;
 import pavlyi.authtools.handlers.SpawnHandler;
 import pavlyi.authtools.handlers.User;
 import pavlyi.authtools.listeners.AuthMeListener;
@@ -45,6 +56,7 @@ public class AuthTools extends JavaPlugin {
 	private MessagesHandler messagesHandler;
 	private MySQL mySQL;
 	private SQLite sqlLite;
+	private MongoDB mongoDB;
 	private YAMLConnection yamlConnection;
 	private GoogleAuthenticator googleAuthenticator;
 	private SpawnHandler spawnHandler;
@@ -63,6 +75,7 @@ public class AuthTools extends JavaPlugin {
 		messagesHandler = new MessagesHandler();
 		mySQL = new MySQL();
 		sqlLite = new SQLite();
+		mongoDB = new MongoDB();
 		yamlConnection = new YAMLConnection();
 		googleAuthenticator = new GoogleAuthenticator();
 		spawnHandler = new SpawnHandler();
@@ -100,6 +113,9 @@ public class AuthTools extends JavaPlugin {
 		if (getConnectionType().equals("SQLITE"))
 			getSQLite().create();
 
+		if (getConnectionType().equals("MONGODB"))
+			getMongoDB().connect();
+
 		getCommand("authtools").setExecutor(new AuthToolsCommand());
 		getCommand("authtools").setTabCompleter(new AuthToolsCommand());
 		getCommand("2fa").setExecutor(new TFACommand());
@@ -115,13 +131,6 @@ public class AuthTools extends JavaPlugin {
 			log("&r  &aSuccess: &fCommand &c/2fa &fhas been registered!");
 		} else {
 			log("&r  &cError: &fCommand &c/2fa &couldn't get registered!");
-		}
-
-		for (Player p : getServer().getOnlinePlayers()) {
-			User user = new User(p.getName());
-
-			user.setIP(p.getAddress());
-			user.setUUID();
 		}
 
 		if (!isHooked()) {
@@ -157,31 +166,127 @@ public class AuthTools extends JavaPlugin {
 
 			for (Player p : getServer().getOnlinePlayers()) {
 				User user = new User(p.getName());
-				
-				if (!user.get2FA())
-					return;
 
-				if (getSpawnHandler().getSpawn("spawn") != null)
-		    		p.teleport(getSpawnHandler().getSpawn("spawn"));
+				if (user.get2FA()) {
+					if (getSpawnHandler().getSpawn("spawn") != null)
+			    		p.teleport(getSpawnHandler().getSpawn("spawn"));
 
-				getAuthLocked().add(p.getName());
-				getSpawnLocations().put(p.getName(), p.getLocation());
+					getAuthLocked().add(p.getName());
+					getSpawnLocations().put(p.getName(), p.getLocation());
 
-				p.sendMessage(getMessagesHandler().COMMANDS_2FA_LOGIN_LOGIN_MESSAGE);
+					p.sendMessage(getMessagesHandler().COMMANDS_2FA_LOGIN_LOGIN_MESSAGE);
 
-				int taskID;
+					int taskID;
 
-				taskID = getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
-					
-					@Override
-					public void run() {
-						p.kickPlayer(getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
+					taskID = getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
+						
+						@Override
+						public void run() {
+							p.kickPlayer(getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
+						}
+						
+					}, 20 * getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+
+					runnables.put(p.getName(), taskID);
+				} else {
+					instance.getSpawnLocations().put(p.getName(), p.getLocation());
+
+					if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TELEPORT_UNAUTHED_TO_SPAWN) {
+						if (instance.getSpawnHandler().getSpawn("spawn") != null)
+				    		p.teleport(instance.getSpawnHandler().getSpawn("spawn"));
 					}
-					
-				}, 20 * getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
 
-				runnables.put(p.getName(), taskID);
+					instance.getRegisterLocked().add(p.getName());
 
+					GoogleAuthenticatorKey secretKey = instance.getGoogleAuthenticator().createCredentials();
+
+					user.setSettingUp2FA(true);
+					user.set2FAsecret(secretKey.getKey());
+					user.setRecoveryCode(false);		
+
+					QRCreate.create(p, secretKey.getKey());
+
+					for (String tempMessage : instance.getMessagesHandler().COMMANDS_2FA_SETUP_AUTHAPP) {
+						tempMessage = tempMessage.replace("%secretkey%", secretKey.getKey());
+						tempMessage = tempMessage.replace("%recoverycode%", String.valueOf(user.getRecoveryCode()));
+
+						p.sendMessage(tempMessage);
+					}
+
+					Inventory inv = Bukkit.createInventory(p, 36);
+					for (ItemStack is : p.getInventory().getContents()) {
+						if (is != null)
+							inv.addItem(is);
+					}
+
+					TFACommand.inventories.put(p, inv);
+
+					ItemStack qrCodeMap = new ItemStack(Material.MAP);
+					ItemMeta qrCodeMapIM = qrCodeMap.getItemMeta();
+					qrCodeMapIM.setDisplayName(instance.getMessagesHandler().COMMANDS_2FA_SETUP_QRCODE_TITLE);
+					qrCodeMapIM.setLore(instance.getMessagesHandler().COMMANDS_2FA_SETUP_QRCODE_LORE);
+					qrCodeMap.setItemMeta(qrCodeMapIM);
+
+					p.getInventory().clear();
+					p.getInventory().setHeldItemSlot(0);
+					p.getInventory().setItem(0, qrCodeMap);
+
+					MapView view = Bukkit.getMap(p.getInventory().getItem(0).getDurability());
+					Iterator<MapRenderer> iter;
+
+					if (view.getRenderers().iterator() != null) {
+						iter = view.getRenderers().iterator();
+
+						while (iter.hasNext()) {
+							view.removeRenderer(iter.next());
+						}
+
+						try {
+							ImageRenderer renderer = new ImageRenderer(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png");
+							view.addRenderer(renderer);
+
+							new File(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png").delete();
+						} catch (IOException ex) {
+							ex.printStackTrace();
+						}
+					} else {
+						view = Bukkit.getMap(p.getInventory().getItem(0).getDurability());
+						iter = view.getRenderers().iterator();
+
+						while (iter.hasNext()) {
+							view.removeRenderer(iter.next());
+						}
+
+						try {
+							ImageRenderer renderer = new ImageRenderer(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png");
+							view.addRenderer(renderer);
+
+							new File(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png").delete();
+						} catch (IOException ex) {
+							ex.printStackTrace();
+						}
+					}
+
+					if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT == 0) 
+						return;
+
+					int taskID;
+
+					taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
+						
+						@Override
+						public void run() {
+							p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
+						}
+						
+					}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+
+					instance.getRunnables().put(p.getName(), taskID);
+				}
+
+				
+
+				user.create();
 				user.setIP(p.getAddress());
 				user.setUUID();
 			}
@@ -215,6 +320,14 @@ public class AuthTools extends JavaPlugin {
 				log("&r  &cError: &fListener &cStoreDataListener &fcouldn't get registered!");
 			}
 
+			for (Player p : getServer().getOnlinePlayers()) {
+				User user = new User(p.getName());
+
+				user.create();
+				user.setIP(p.getAddress());
+				user.setUUID();
+			}
+
 			log("&f&m-------------------------");
 		}
 	}
@@ -222,11 +335,32 @@ public class AuthTools extends JavaPlugin {
 	public void onDisable() {
 		getServer().getScheduler().cancelTasks(instance);
 
+
+		for (Player p : getServer().getOnlinePlayers()) {
+			User user = new User(p.getName());
+
+			if (user.getSettingUp2FA()) {
+				user.setSettingUp2FA(false);
+				user.set2FA(false);
+				user.set2FAsecret(null);
+				user.setRecoveryCode(true);
+
+				if (TFACommand.inventories.containsKey(p)) {
+					p.getInventory().clear();
+					p.getInventory().setContents(TFACommand.inventories.get(p).getContents());
+					TFACommand.inventories.remove(p);
+				}
+			}
+		}
+
 		if (getConnectionType().equals("MYSQL"))
 			getMySQL().disconnect();
 
 		if (getConnectionType().equals("SQLITE"))
 			getSQLite().unload();
+
+		if (getConnectionType().equals("MONGODB"))
+			getMongoDB().disconnect();
 	}
 
 	public static void main(String[] args) {
@@ -274,6 +408,9 @@ public class AuthTools extends JavaPlugin {
 		if (getConnectionType().equals("SQLITE"))
 			getSQLite().create();
 
+		if (getConnectionType().equals("MONGODB"))
+			getMongoDB().connect();
+
 		getCommand("authtools").setExecutor(new AuthToolsCommand());
 		getCommand("authtools").setTabCompleter(new AuthToolsCommand());
 		getCommand("2fa").setExecutor(new TFACommand());
@@ -294,6 +431,7 @@ public class AuthTools extends JavaPlugin {
 		for (Player p : getServer().getOnlinePlayers()) {
 			User user = new User(p.getName());
 
+			user.create();
 			user.setIP(p.getAddress());
 			user.setUUID();
 		}
@@ -493,6 +631,10 @@ public class AuthTools extends JavaPlugin {
 	
 	public SQLite getSQLite() {
 		return sqlLite;
+	}
+	
+	public MongoDB getMongoDB() {
+		return mongoDB;
 	}
 	
 	public YAMLConnection getYamlConnection() {

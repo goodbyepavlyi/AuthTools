@@ -1,0 +1,65 @@
+###################################
+#                                 #
+#   AuthTools v1.1                #
+#                                 #
+#   Author: Pavlyi                #
+#   Website: http://pavlyi.eu     #
+#                                 #
+###################################
+
+connection:
+    # What type of connection do you want to use?
+    # Valid: YAML, SQLITE, MYSQL
+    type: YAML
+
+    yaml:
+        # YAML file name
+        fileName: playerData.yml
+
+    mysql:
+        # MySQL host address
+        hostname: localhost
+        # MySQL port
+        port: 3306
+        # MySQL database
+        database: database
+        # MySQL username
+        username: username
+        # MySQL password
+        password: password
+    
+    sqlite:
+        # SQLite file name
+        fileName: sqlite.db
+    
+    mongodb:
+        cluster: cluster
+        database: database
+        username: username
+        password: password
+
+settings:
+    # Should we hook into AuthMe?
+    hookIntoAuthMe: false
+    # Enter here your server name to show when players scan QR Code
+    serverName: "Minecraft Server"
+
+    restrictions:
+        # Allowed commands to do even when not logged in
+        allowedCommands:
+        - "2fa recover"
+        # After how many seconds should players who fail to login or register be kicked?
+        # Set to 0 to disable.
+        timeout: 30
+        # When this setting is enabled, so that players can't be kicked
+        # due to "Logged in from another Location"
+        forceSingleSession: true
+        # Should players be kicked on wrong 2fa code?
+        kickOnWrong2FAcode: false
+        # Should players when they join get teleported to spawn
+        teleportUnAuthedToSpawn: false
+        # Can unregistered players walk around?
+        allowMovement: false
+        # How far can players walk?
+        # Set to 0 for unlimited radius
+        allowedMovementRadius: 100

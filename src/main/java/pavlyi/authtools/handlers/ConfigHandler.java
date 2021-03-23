@@ -28,6 +28,11 @@ public class ConfigHandler {
 
 	public String CONNECTION_SQLITE_FILENAME;
 
+	public String CONNECTION_MONGODB_CLUSTER;
+	public String CONNECTION_MONGODB_DATABASE;
+	public String CONNECTION_MONGODB_USERNAME;
+	public String CONNECTION_MONGODB_PASSWORD;
+
 	public boolean SETTINGS_HOOK_INTO_AUTHME;
 	public String SETTINGS_SERVER_NAME;
 
@@ -84,6 +89,11 @@ public class ConfigHandler {
 		CONNECTION_MYSQL_PASSWORD = getConfig().getString("connection.mysql.password");
 
 		CONNECTION_SQLITE_FILENAME = getConfig().getString("connection.sqlite.fileName");
+
+		CONNECTION_MONGODB_CLUSTER = getConfig().getString("connection.mongodb.cluster");
+		CONNECTION_MONGODB_DATABASE = getConfig().getString("connection.mongodb.database");
+		CONNECTION_MONGODB_USERNAME = getConfig().getString("connection.mongodb.username");
+		CONNECTION_MONGODB_PASSWORD = getConfig().getString("connection.mongodb.password");
 
 		SETTINGS_HOOK_INTO_AUTHME = getConfig().getBoolean("settings.hookIntoAuthMe");
 		SETTINGS_SERVER_NAME = getConfig().getString("settings.serverName");

@@ -10,9 +10,11 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.PlayerLeashEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -134,22 +136,37 @@ public class PlayerRegisterListener implements Listener {
 		MapView view = Bukkit.getMap(p.getInventory().getItem(0).getDurability());
 		Iterator<MapRenderer> iter;
 
-		try {
+		if (view.getRenderers().iterator() != null) {
 			iter = view.getRenderers().iterator();
-		} catch (NullPointerException ex) {
+
+			while (iter.hasNext()) {
+				view.removeRenderer(iter.next());
+			}
+
+			try {
+				ImageRenderer renderer = new ImageRenderer(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png");
+				view.addRenderer(renderer);
+
+				new File(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png").delete();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		} else {
+			view = Bukkit.getMap(p.getInventory().getItem(0).getDurability());
 			iter = view.getRenderers().iterator();
-		}
-		while (iter.hasNext()) {
-			view.removeRenderer(iter.next());
-		}
 
-		try {
-			ImageRenderer renderer = new ImageRenderer(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png");
-			view.addRenderer(renderer);
+			while (iter.hasNext()) {
+				view.removeRenderer(iter.next());
+			}
 
-			new File(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png").delete();
-		} catch (IOException ex) {
-			ex.printStackTrace();
+			try {
+				ImageRenderer renderer = new ImageRenderer(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png");
+				view.addRenderer(renderer);
+
+				new File(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png").delete();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
 		}
 
 		if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT == 0) 
@@ -267,6 +284,18 @@ public class PlayerRegisterListener implements Listener {
 		
 		if (instance.getRegisterLocked().contains(p.getName())) {
 			e.setCancelled(true);
+		}
+		
+	}
+
+	@EventHandler
+	public void disableDamage(EntityDamageEvent e) {
+		if (e.getEntityType().equals(EntityType.PLAYER)) {
+			Player p = (Player) e.getEntity();
+			
+			if (instance.getRegisterLocked().contains(p.getName())) {
+				e.setCancelled(true);
+			}
 		}
 		
 	}

@@ -15,6 +15,7 @@ public class StoreDataListener implements Listener {
 	public void storeData(PlayerJoinEvent e) {
 		User user = new User(e.getPlayer().getName());
 
+		user.create();
 		user.setIP(e.getPlayer().getAddress());
 		user.setUUID();
 	}
