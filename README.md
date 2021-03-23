@@ -25,7 +25,7 @@ typing commands or using the inventory.
 <ul>
   <li><strong>Email recovery system</strong>.</li>
   <li><strong>Remember IP adresses</strong>.</li>
-  <li><strong>Add MongoDB and JSON backend support</strong>.</li>
+  <li><strong>Add JSON backend support</strong>.</li>
   <li><strong>Events & API for developers</strong>.</li>
   <li><strong>Add Maximum registration & Maximum connection with one IP</strong>.</li>
   <li><strong>Remove join & leave messages if player doesn't log in</strong>.</li>
