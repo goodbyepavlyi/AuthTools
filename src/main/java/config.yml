@@ -1,6 +1,6 @@
 ###################################
 #                                 #
-#   AuthTools v1.1                #
+#   AuthTools v1.2                #
 #                                 #
 #   Author: Pavlyi                #
 #   Website: http://pavlyi.eu     #
@@ -9,7 +9,7 @@
 
 connection:
     # What type of connection do you want to use?
-    # Valid: YAML, SQLITE, MYSQL
+    # Valid: YAML, SQLITE, MYSQL, MONGODB
     type: YAML
 
     yaml:
@@ -33,9 +33,13 @@ connection:
         fileName: sqlite.db
     
     mongodb:
+        # MongoDB cluster
         cluster: cluster
+        # MongoDB database
         database: database
+        # MongoDB username
         username: username
+        # MongoDB password
         password: password
 
 settings:
@@ -63,3 +67,50 @@ settings:
         # How far can players walk?
         # Set to 0 for unlimited radius
         allowedMovementRadius: 100
+    
+    titleAnnouncement:
+        title:
+            # Enables the title
+            enable: true
+            # Makes a fade in for title
+            fadeIn: 20
+            # Makes a fade out for title
+            fadeOut: 20
+            
+            # Enable if you want title in register
+            useInRegister: true
+            # Enable if you want title in login
+            useInLogin: true
+        
+        subtitle:
+            # Enables the title
+            enable: true
+            # Makes a fade in for title
+            fadeIn: 20
+            # Makes a fade out for title
+            fadeOut: 20
+            
+            # Enable if you want title in register
+            useInRegister: true
+            # Enable if you want title in login
+            useInLogin: true
+        
+        actionbar:
+            # Enables the title
+            enable: true
+            
+            # Enable if you want title in register
+            useInRegister: true
+            # Enable if you want title in login
+            useInLogin: true
+        
+        register:
+            title: "&c&lRegister"
+            subtitle: ""
+            actionbar: "&fEnter &csecret key &finto &capp &for scan the &cQR Code&f!"
+        
+        login:
+            title: "&c&lRegister"
+            subtitle: ""
+            actionbar: "&fEnter &csecret key &finto &capp &for scan the &cQR Code&f!"
+            

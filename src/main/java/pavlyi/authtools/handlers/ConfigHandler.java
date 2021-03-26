@@ -44,6 +44,30 @@ public class ConfigHandler {
 	public boolean SETTINGS_RESTRICTIONS_FORCE_SINGLE_SESSION;
 	public boolean SETTINGS_RESTRICTIONS_KICK_ON_WRONG_2FA_CODE;
 
+	public boolean SETTINGS_TITLE_ANNOUNCEMENT_TITLE_ENABLE;
+	public int SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEIN;
+	public int SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEOUT;
+	public boolean SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_REGISTER;
+	public boolean SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_LOGIN;
+	
+	public boolean SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_ENABLE;
+	public int SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEIN;
+	public int SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEOUT;
+	public boolean SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_REGISTER;
+	public boolean SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_LOGIN;
+
+	public boolean SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_ENABLE;
+	public boolean SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_REGISTER;
+	public boolean SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_LOGIN;
+	
+	public String SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_TITLE;
+	public String SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_SUBTITLE;
+	public String SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_ACTIONBAR;
+
+	public String SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_TITLE;
+	public String SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_SUBTITLE;
+	public String SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_ACTIONBAR;
+
 
 	public void createConfig() {
 		f = new File(instance.getDataFolder()+"/config.yml");
@@ -108,6 +132,30 @@ public class ConfigHandler {
 		SETTINGS_RESTRICTIONS_TELEPORT_UNAUTHED_TO_SPAWN = getConfig().getBoolean("settings.restrictions.teleportUnAuthedToSpawn");
 		SETTINGS_RESTRICTIONS_FORCE_SINGLE_SESSION = getConfig().getBoolean("settings.restrictions.forceSingleSession");
 		SETTINGS_RESTRICTIONS_KICK_ON_WRONG_2FA_CODE = getConfig().getBoolean("settings.restrictions.kickOnWrong2FAcode");
+		
+		SETTINGS_TITLE_ANNOUNCEMENT_TITLE_ENABLE = getConfig().getBoolean("settings.titleAnnouncement.title.enable");
+		SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEIN = getConfig().getInt("settings.titleAnnouncement.title.fadein");
+		SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEOUT = getConfig().getInt("settings.titleAnnouncement.title.fadeout");
+		SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_REGISTER = getConfig().getBoolean("settings.titleAnnouncement.title.useInRegister");
+		SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_LOGIN = getConfig().getBoolean("settings.titleAnnouncement.title.useInLogin");
+
+		SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_ENABLE = getConfig().getBoolean("settings.titleAnnouncement.subtitle.enable");
+		SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEIN = getConfig().getInt("settings.titleAnnouncement.subtitle.fadein");
+		SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEOUT = getConfig().getInt("settings.titleAnnouncement.subtitle.fadeout");
+		SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_REGISTER = getConfig().getBoolean("settings.titleAnnouncement.subtitle.useInRegister");
+		SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_LOGIN = getConfig().getBoolean("settings.titleAnnouncement.subtitle.useInLogin");
+
+		SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_ENABLE = getConfig().getBoolean("settings.titleAnnouncement.actionbar.enable");
+		SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_REGISTER = getConfig().getBoolean("settings.titleAnnouncement.actionbar.useInRegister");
+		SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_LOGIN = getConfig().getBoolean("settings.titleAnnouncement.actionbar.useInLogin");
+		
+		SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_TITLE = instance.color(getConfig().getString("settings.titleAnnouncement.register.title"));
+		SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_SUBTITLE = instance.color(getConfig().getString("settings.titleAnnouncement.register.subtitle"));
+		SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_ACTIONBAR = instance.color(getConfig().getString("settings.titleAnnouncement.register.actionbar"));
+
+		SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_TITLE = instance.color(getConfig().getString("settings.titleAnnouncement.login.title"));
+		SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_SUBTITLE = instance.color(getConfig().getString("settings.titleAnnouncement.login.subtitle"));
+		SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_ACTIONBAR = instance.color(getConfig().getString("settings.titleAnnouncement.login.actionbar"));
 	}
 
 

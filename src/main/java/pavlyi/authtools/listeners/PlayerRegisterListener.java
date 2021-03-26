@@ -10,11 +10,15 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.PlayerLeashEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -69,10 +73,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
+import com.connorlinfoot.titleapi.TitleAPI;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 
 import pavlyi.authtools.AuthTools;
 import pavlyi.authtools.commands.TFACommand;
+import pavlyi.authtools.handlers.ActionBarAPI;
 import pavlyi.authtools.handlers.ImageRenderer;
 import pavlyi.authtools.handlers.QRCreate;
 import pavlyi.authtools.handlers.SpawnHandler;
@@ -169,21 +175,52 @@ public class PlayerRegisterListener implements Listener {
 			}
 		}
 
-		if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT == 0) 
-			return;
+		TitleAPI.clearTitle(p);
+		if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_ENABLE) {
+			if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_REGISTER)
+				return;
 
-		int taskID;
+			TitleAPI.sendTitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_TITLE);
+		}
+		
+		if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_ENABLE) {
+			if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_REGISTER)
+				return;
 
-		taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
-			
-			@Override
-			public void run() {
-				p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
-			}
-			
-		}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+			TitleAPI.sendSubtitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_SUBTITLE);
+		}
 
-		instance.getRunnables().put(p.getName(), taskID);
+		if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_ENABLE) {
+			if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_REGISTER)
+				return;
+
+			int taskID;
+
+			taskID = instance.getServer().getScheduler().scheduleSyncRepeatingTask(instance, new Runnable() {
+				
+				@Override
+				public void run() {
+					ActionBarAPI.sendActionBar(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_ACTIONBAR);
+				}
+			}, 0, 20);
+
+			instance.getActionBarRunnables().put(p.getName(), taskID);
+		}
+
+		if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT != 0) {
+			int taskID;
+
+			taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
+
+				@Override
+				public void run() {
+					p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
+				}
+
+			}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+
+			instance.getRunnables().put(p.getName(), taskID);
+		}
 	}
 
 	@EventHandler
@@ -199,31 +236,39 @@ public class PlayerRegisterListener implements Listener {
 	        try {
 	        	code = Integer.parseInt(message);
 
-		        if (instance.getGoogleAuthenticator().authorize(user.get2FAsecret(), code)) {
-		            user.set2FA(true);
-		            user.setSettingUp2FA(false);
+				if (instance.getGoogleAuthenticator().authorize(user.get2FAsecret(), code)) {
+					user.set2FA(true);
+					user.setSettingUp2FA(false);
 
-		            if (TFACommand.inventories.containsKey(p)) {
+					if (TFACommand.inventories.containsKey(p)) {
 						p.getInventory().clear();
 						p.getInventory().setContents(TFACommand.inventories.get(p).getContents());
 						TFACommand.inventories.remove(p);
 					}
 
-		            instance.getRegisterLocked().remove(p.getName());
+					TitleAPI.clearTitle(p);
 
-		            if (instance.getRunnables().containsKey(p.getName())) {
-		            	instance.getServer().getScheduler().cancelTask(instance.getRunnables().get(p.getName()));
-		            	instance.getRunnables().remove(p.getName());
-		            }
+					if (instance.getActionBarRunnables().get(p.getName()) != null) {
+	        			instance.getServer().getScheduler().cancelTask(instance.getActionBarRunnables().get(p.getName()));
+						instance.getActionBarRunnables().remove(p.getName(), instance.getActionBarRunnables().get(p.getName()));							
+					}
 
-		            p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_SETUP_ENABLED);
-		            return;
-		        }
+					instance.getRegisterLocked().remove(p.getName());
+					instance.getAuthLocked().remove(p.getName());
 
-		        p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_SETUP_INVALID_CODE);
-	        } catch (NumberFormatException ex) {
-	        	p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_SETUP_INVALID_CODE);
-	        }
+					if (instance.getRunnables().containsKey(p.getName())) {
+						instance.getServer().getScheduler().cancelTask(instance.getRunnables().get(p.getName()));
+						instance.getRunnables().remove(p.getName());
+					}
+
+					p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_SETUP_ENABLED);
+					return;
+				}
+
+				p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_SETUP_INVALID_CODE);
+			} catch (NumberFormatException ex) {
+				p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_SETUP_INVALID_CODE);
+			}
 		}
 	}
 
@@ -244,7 +289,15 @@ public class PlayerRegisterListener implements Listener {
 				TFACommand.inventories.remove(p);
 			}
 
-            instance.getRegisterLocked().remove(p.getName());
+			TitleAPI.clearTitle(p);
+
+			if (instance.getActionBarRunnables().get(p.getName()) != null) {
+    			instance.getServer().getScheduler().cancelTask(instance.getActionBarRunnables().get(p.getName()));
+				instance.getActionBarRunnables().remove(p.getName(), instance.getActionBarRunnables().get(p.getName()));							
+			}
+
+			instance.getRegisterLocked().remove(p.getName());
+			instance.getAuthLocked().remove(p.getName());
 
             if (instance.getRunnables().containsKey(p.getName())) {
             	instance.getServer().getScheduler().cancelTask(instance.getRunnables().get(p.getName()));
@@ -328,6 +381,34 @@ public class PlayerRegisterListener implements Listener {
 			e.setCancelled(true);
 		}
 		
+	}
+	
+	@EventHandler
+	public void disableMobsTargetingPlayer(EntityTargetLivingEntityEvent e) {
+		Entity entity = e.getEntity();
+		
+		if (entity.getType() != EntityType.PLAYER) {
+			for (Player all : instance.getServer().getOnlinePlayers()) {
+				if (instance.getRegisterLocked().contains(all.getName())) {
+					if (e.getTarget().equals(all)) {
+						e.setTarget(null);
+					}
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	public void disablePlayerDamagingMobs(EntityDamageByEntityEvent e) {
+		Entity entity = e.getEntity();
+
+		if (entity.getType() == EntityType.PLAYER) {
+			for (Player all : instance.getServer().getOnlinePlayers()) {
+				if (instance.getRegisterLocked().contains(all.getName())) {
+					e.setCancelled(true);
+				}
+			}
+		}
 	}
 
 	@EventHandler

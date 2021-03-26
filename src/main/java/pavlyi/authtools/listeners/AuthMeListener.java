@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -61,6 +62,9 @@ import org.bukkit.event.player.PlayerUnleashEntityEvent;
 import org.bukkit.event.player.PlayerVelocityEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import com.connorlinfoot.titleapi.TitleAPI;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -69,6 +73,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import fr.xephi.authme.events.AuthMeAsyncPreLoginEvent;
 import pavlyi.authtools.commands.TFACommand;
+import pavlyi.authtools.handlers.ActionBarAPI;
 import pavlyi.authtools.handlers.SpawnHandler;
 import pavlyi.authtools.AuthTools;
 import pavlyi.authtools.handlers.User;
@@ -95,21 +100,52 @@ public class AuthMeListener implements Listener {
 
 		p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_LOGIN_MESSAGE);
 
-		if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT == 0)
-			return;
+		TitleAPI.clearTitle(p);
+		if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_ENABLE) {
+			if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_LOGIN)
+				return;
 
-		int taskID;
+			TitleAPI.sendTitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_TITLE);
+		}
+		
+		if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_ENABLE) {
+			if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_LOGIN)
+				return;
 
-		taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
+			TitleAPI.sendSubtitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_SUBTITLE);
+		}
 
-			@Override
-			public void run() {
-				p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
-			}
+		if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_ENABLE) {
+			if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_LOGIN)
+				return;
 
-		}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+			int taskID;
 
-		instance.getRunnables().put(p.getName(), taskID);
+			taskID = instance.getServer().getScheduler().scheduleSyncRepeatingTask(instance, new Runnable() {
+				
+				@Override
+				public void run() {
+					ActionBarAPI.sendActionBar(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_ACTIONBAR);
+				}
+			}, 0, 20);
+
+			instance.getActionBarRunnables().put(p.getName(), taskID);
+		}
+
+		if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT != 0) {
+			int taskID;
+
+			taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
+
+				@Override
+				public void run() {
+					p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
+				}
+
+			}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+
+			instance.getRunnables().put(p.getName(), taskID);
+		}
 	}
 
 	@EventHandler
@@ -117,6 +153,14 @@ public class AuthMeListener implements Listener {
 		Player p = e.getPlayer();
 
 		if (instance.getAuthLocked().contains(p.getName())) {
+			TitleAPI.clearTitle(p);
+
+			if (instance.getActionBarRunnables().get(p.getName()) != null) {
+    			instance.getServer().getScheduler().cancelTask(instance.getActionBarRunnables().get(p.getName()));
+				instance.getActionBarRunnables().remove(p.getName(), instance.getActionBarRunnables().get(p.getName()));							
+			}
+
+			instance.getRegisterLocked().remove(p.getName());
 			instance.getAuthLocked().remove(p.getName());
 
 			if (instance.getRunnables().get(p.getName()) != null)
@@ -139,8 +183,15 @@ public class AuthMeListener implements Listener {
 
 				if (user.get2FAsecret() != null) {
 					if (instance.getGoogleAuthenticator().authorize(user.get2FAsecret(), code)) {
-						instance.getAuthLocked().remove(p.getName());
+						TitleAPI.clearTitle(p);
 
+						if (instance.getActionBarRunnables().get(p.getName()) != null) {
+		        			instance.getServer().getScheduler().cancelTask(instance.getActionBarRunnables().get(p.getName()));
+							instance.getActionBarRunnables().remove(p.getName(), instance.getActionBarRunnables().get(p.getName()));							
+						}
+
+						instance.getRegisterLocked().remove(p.getName());
+						instance.getAuthLocked().remove(p.getName());
 						if (instance.getSpawnHandler().getSpawn("lobby") != null)
 							p.teleport(instance.getSpawnHandler().getSpawn("lobby"));
 
@@ -151,6 +202,7 @@ public class AuthMeListener implements Listener {
 						return;
 					}
 				} else {
+					instance.getRegisterLocked().remove(p.getName());
 					instance.getAuthLocked().remove(p.getName());
 				}
 

@@ -27,6 +27,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.connorlinfoot.titleapi.TitleAPI;
 import com.google.common.collect.Sets.SetView;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
@@ -37,6 +38,7 @@ import pavlyi.authtools.connections.MongoDB;
 import pavlyi.authtools.connections.MySQL;
 import pavlyi.authtools.connections.SQLite;
 import pavlyi.authtools.connections.YAMLConnection;
+import pavlyi.authtools.handlers.ActionBarAPI;
 import pavlyi.authtools.handlers.ConfigHandler;
 import pavlyi.authtools.handlers.ImageRenderer;
 import pavlyi.authtools.handlers.MessagesHandler;
@@ -64,6 +66,7 @@ public class AuthTools extends JavaPlugin {
 	private ArrayList<String> registerLocked;
 	private HashMap<String, Location> spawnLocations;
 	private HashMap<String, Integer> runnables;
+	private HashMap<String, Integer> actionBarRunnables;
 
 	private String connectionType;
 	private String updateURL;
@@ -83,6 +86,7 @@ public class AuthTools extends JavaPlugin {
 		registerLocked = new ArrayList<String>();
 		spawnLocations = new HashMap<String, Location>();
 		runnables = new HashMap<String, Integer>();
+		actionBarRunnables = new HashMap<String, Integer>();
 		updateURL = getUpdateURL();
 
 		log("&f&m-------------------------");
@@ -176,18 +180,50 @@ public class AuthTools extends JavaPlugin {
 
 					p.sendMessage(getMessagesHandler().COMMANDS_2FA_LOGIN_LOGIN_MESSAGE);
 
-					int taskID;
+					TitleAPI.clearTitle(p);
+					if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_ENABLE) {
+						if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_LOGIN)
+							return;
 
-					taskID = getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
-						
-						@Override
-						public void run() {
-							p.kickPlayer(getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
-						}
-						
-					}, 20 * getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+						TitleAPI.sendTitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_TITLE);
+					}
+					
+					if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_ENABLE) {
+						if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_LOGIN)
+							return;
 
-					runnables.put(p.getName(), taskID);
+						TitleAPI.sendSubtitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_SUBTITLE);
+					}
+
+					if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_ENABLE) {
+						if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_LOGIN)
+							return;
+
+						int taskID;
+
+						taskID = instance.getServer().getScheduler().scheduleSyncRepeatingTask(instance, new Runnable() {
+							
+							@Override
+							public void run() {
+								ActionBarAPI.sendActionBar(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_ACTIONBAR);
+							}
+						}, 0, 20);
+					}
+
+					if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT != 0) {
+						int taskID;
+
+						taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
+
+							@Override
+							public void run() {
+								p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
+							}
+
+						}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+
+						instance.getRunnables().put(p.getName(), taskID);
+					}
 				} else {
 					instance.getSpawnLocations().put(p.getName(), p.getLocation());
 
@@ -267,21 +303,50 @@ public class AuthTools extends JavaPlugin {
 						}
 					}
 
-					if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT == 0) 
-						return;
+					TitleAPI.clearTitle(p);
+					if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_ENABLE) {
+						if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_REGISTER)
+							return;
 
-					int taskID;
+						TitleAPI.sendTitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_TITLE);
+					}
+					
+					if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_ENABLE) {
+						if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_REGISTER)
+							return;
 
-					taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
-						
-						@Override
-						public void run() {
-							p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
-						}
-						
-					}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+						TitleAPI.sendSubtitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_SUBTITLE);
+					}
 
-					instance.getRunnables().put(p.getName(), taskID);
+					if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_ENABLE) {
+						if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_REGISTER)
+							return;
+
+						int taskID;
+
+						taskID = instance.getServer().getScheduler().scheduleSyncRepeatingTask(instance, new Runnable() {
+							
+							@Override
+							public void run() {
+								ActionBarAPI.sendActionBar(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_ACTIONBAR);
+							}
+						}, 0, 20);
+					}
+
+					if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT != 0) {
+						int taskID;
+
+						taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
+
+							@Override
+							public void run() {
+								p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
+							}
+
+						}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+
+						instance.getRunnables().put(p.getName(), taskID);
+					}
 				}
 
 				
@@ -663,5 +728,9 @@ public class AuthTools extends JavaPlugin {
 	
 	public HashMap<String, Integer> getRunnables() {
 		return runnables;
+	}
+	
+	public HashMap<String, Integer> getActionBarRunnables() {
+		return actionBarRunnables;
 	}
 }

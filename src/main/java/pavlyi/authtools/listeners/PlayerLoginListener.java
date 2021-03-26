@@ -13,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -70,10 +71,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
+import com.connorlinfoot.titleapi.TitleAPI;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 
 import pavlyi.authtools.AuthTools;
 import pavlyi.authtools.commands.TFACommand;
+import pavlyi.authtools.handlers.ActionBarAPI;
 import pavlyi.authtools.handlers.ImageRenderer;
 import pavlyi.authtools.handlers.QRCreate;
 import pavlyi.authtools.handlers.SpawnHandler;
@@ -100,22 +103,53 @@ public class PlayerLoginListener implements Listener {
 		instance.getAuthLocked().add(p.getName());
 
 		p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_LOGIN_MESSAGE);
+		
+		TitleAPI.clearTitle(p);
+		if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_ENABLE) {
+			if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_LOGIN)
+				return;
 
-		if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT == 0) 
-			return;
+			TitleAPI.sendTitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_TITLE);
+		}
+		
+		if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_ENABLE) {
+			if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_LOGIN)
+				return;
 
-		int taskID;
+			TitleAPI.sendSubtitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_SUBTITLE);
+		}
 
-		taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
-			
-			@Override
-			public void run() {
-				p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
-			}
-			
-		}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+		if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_ENABLE) {
+			if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_LOGIN)
+				return;
 
-		instance.getRunnables().put(p.getName(), taskID);
+			int taskID;
+
+			taskID = instance.getServer().getScheduler().scheduleSyncRepeatingTask(instance, new Runnable() {
+				
+				@Override
+				public void run() {
+					ActionBarAPI.sendActionBar(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_ACTIONBAR);
+				}
+			}, 0, 20);
+
+			instance.getActionBarRunnables().put(p.getName(), taskID);
+		}
+
+		if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT != 0) {
+			int taskID;
+
+			taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
+
+				@Override
+				public void run() {
+					p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
+				}
+
+			}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+
+			instance.getRunnables().put(p.getName(), taskID);
+		}
 	}
 
 	@EventHandler
@@ -123,6 +157,13 @@ public class PlayerLoginListener implements Listener {
 		Player p = e.getPlayer();
 
 		if (instance.getAuthLocked().contains(p.getName())) {
+			TitleAPI.clearTitle(p);
+			if (instance.getActionBarRunnables().get(p.getName()) != null) {
+    			instance.getServer().getScheduler().cancelTask(instance.getActionBarRunnables().get(p.getName()));
+				instance.getActionBarRunnables().remove(p.getName(), instance.getActionBarRunnables().get(p.getName()));							
+			}
+
+			instance.getRegisterLocked().remove(p.getName());
 			instance.getAuthLocked().remove(p.getName());
 
 			if (instance.getRunnables().get(p.getName()) != null)
@@ -145,7 +186,15 @@ public class PlayerLoginListener implements Listener {
 
 	        	if (user.get2FAsecret() != null) {
 	        		if (instance.getGoogleAuthenticator().authorize(user.get2FAsecret(), code)) {
-			        	instance.getAuthLocked().remove(p.getName());
+	        			TitleAPI.clearTitle(p);
+
+						if (instance.getActionBarRunnables().get(p.getName()) != null) {
+		        			instance.getServer().getScheduler().cancelTask(instance.getActionBarRunnables().get(p.getName()));
+							instance.getActionBarRunnables().remove(p.getName(), instance.getActionBarRunnables().get(p.getName()));							
+						}
+
+						instance.getRegisterLocked().remove(p.getName());
+						instance.getAuthLocked().remove(p.getName());
 
 			        	if (instance.getSpawnHandler().getSpawn("lobby") != null)
 			        		p.teleport(instance.getSpawnHandler().getSpawn("lobby"));
@@ -154,20 +203,22 @@ public class PlayerLoginListener implements Listener {
 			        		instance.getServer().getScheduler().cancelTask(instance.getRunnables().get(p.getName()));
 
 			        	p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_LOGGED_IN);
+
 			            return;
 			        }
 	        	} else {
-	        		instance.getAuthLocked().remove(p.getName());
+					instance.getRegisterLocked().remove(p.getName());
+					instance.getAuthLocked().remove(p.getName());
 	        	}
 
 		        p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_SETUP_INVALID_CODE);
 
-		        if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_KICK_ON_WRONG_2FA_CODE)
-		        	instance.getServer().getScheduler().runTask(instance, new Runnable() {
-		    			public void run() {
-		    				p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_WRONG_CODE_KICK);
-		    			}
-		    		});
+				if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_KICK_ON_WRONG_2FA_CODE)
+					instance.getServer().getScheduler().runTask(instance, new Runnable() {
+						public void run() {
+							p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_WRONG_CODE_KICK);
+						}
+					});
 	        } catch (NumberFormatException ex) {
 	        	p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_SETUP_INVALID_CODE);
 
