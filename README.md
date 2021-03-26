@@ -1,4 +1,4 @@
-# AuthTools
+# AuthTools <img src="https://github.com/pavlyi1/AuthTools/raw/main/images/pluginLogo-32.png"></img>
 **2FA Verification Addon for AuthMe or a standalone 2FA Auth Plugin**
 
 ## Description
@@ -19,6 +19,7 @@ typing commands or using the inventory.
   <li><strong>Admins can reset others players 2FA</strong>.</li>
   <li><strong>In-Game QR Code for Authenticator App</strong>.</li>
   <li><strong>Recovery codes for players</strong>.</li>
+  <li><strong>Title announcement when players login or register</strong>.</li>
 </ul>
 
 #### Planning
@@ -28,14 +29,13 @@ typing commands or using the inventory.
   <li><strong>Add JSON backend support</strong>.</li>
   <li><strong>Events & API for developers</strong>.</li>
   <li><strong>Add Maximum registration & Maximum connection with one IP</strong>.</li>
-  <li><strong>Remove join & leave messages if player doesn't log in</strong>.</li>
   <li><strong>Add "/authtools import" command that allows you to import data from another backends to active one</strong>.</li>
 </ul>
 
 #### Configuration
-[AuthTools config](https://github.com/pavlyi1/authtools/blob/master/docs/config.md)
+[AuthTools config](https://github.com/pavlyi1/AuthTools/wiki/Configuration)
 #### Messages
-[AuthTools messages](https://github.com/pavlyi1/authtools/blob/master/docs/messages.md)
+[AuthTools messages](https://github.com/pavlyi1/AuthTools/wiki/Messages)
 #### Permissions
 <ul>
   <li><strong>authtools.*</strong> - Gives access to all admin commands.</li>
