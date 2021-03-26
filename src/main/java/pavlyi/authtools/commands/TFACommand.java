@@ -27,6 +27,8 @@ import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 
 import pavlyi.authtools.AuthTools;
+import pavlyi.authtools.events.AuthToolsPlayerRecovered2FAEvent;
+import pavlyi.authtools.events.AuthToolsPlayerRegisteredEvent;
 import pavlyi.authtools.handlers.ImageRenderer;
 import pavlyi.authtools.handlers.QRCreate;
 import pavlyi.authtools.handlers.User;
@@ -135,12 +137,16 @@ public class TFACommand implements CommandExecutor, TabCompleter {
 										if (instance.getAuthLocked().contains(p.getName()))
 											instance.getAuthLocked().remove(p.getName());
 
+										instance.getPluginManager().callEvent(new AuthToolsPlayerRecovered2FAEvent(p, code, true));
+
 										p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_RECOVER_RECOVERED);
 										return true;
 									}
 
+									instance.getPluginManager().callEvent(new AuthToolsPlayerRecovered2FAEvent(p, code, false));
 									p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_RECOVER_INVALID_RECOVERY_CODE);
 								} catch (NumberFormatException ex) {
+									instance.getPluginManager().callEvent(new AuthToolsPlayerRecovered2FAEvent(p, code, false));
 									p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_RECOVER_INVALID_RECOVERY_CODE);
 								}
 							} else {

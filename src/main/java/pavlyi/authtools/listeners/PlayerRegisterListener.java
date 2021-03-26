@@ -78,6 +78,8 @@ import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 
 import pavlyi.authtools.AuthTools;
 import pavlyi.authtools.commands.TFACommand;
+import pavlyi.authtools.events.AuthToolsPlayerLoggedEvent;
+import pavlyi.authtools.events.AuthToolsPlayerRegisteredEvent;
 import pavlyi.authtools.handlers.ActionBarAPI;
 import pavlyi.authtools.handlers.ImageRenderer;
 import pavlyi.authtools.handlers.QRCreate;
@@ -260,6 +262,8 @@ public class PlayerRegisterListener implements Listener {
 						instance.getServer().getScheduler().cancelTask(instance.getRunnables().get(p.getName()));
 						instance.getRunnables().remove(p.getName());
 					}
+
+					instance.getPluginManager().callEvent(new AuthToolsPlayerRegisteredEvent(p));
 
 					p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_SETUP_ENABLED);
 					return;

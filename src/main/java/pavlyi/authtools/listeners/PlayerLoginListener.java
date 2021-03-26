@@ -76,6 +76,7 @@ import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 
 import pavlyi.authtools.AuthTools;
 import pavlyi.authtools.commands.TFACommand;
+import pavlyi.authtools.events.AuthToolsPlayerLoggedEvent;
 import pavlyi.authtools.handlers.ActionBarAPI;
 import pavlyi.authtools.handlers.ImageRenderer;
 import pavlyi.authtools.handlers.QRCreate;
@@ -201,6 +202,8 @@ public class PlayerLoginListener implements Listener {
 
 			        	if (instance.getRunnables().get(p.getName()) != null)
 			        		instance.getServer().getScheduler().cancelTask(instance.getRunnables().get(p.getName()));
+
+			        	instance.getPluginManager().callEvent(new AuthToolsPlayerLoggedEvent(p, code));
 
 			        	p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_LOGGED_IN);
 
