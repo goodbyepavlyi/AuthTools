@@ -12,7 +12,7 @@ typing commands or using the inventory.
 <ul>
   <li><strong>Disables the an "Logged in from another location" kick</strong>.</li>
   <li><strong>Fully customizable messages</strong>.</li>
-  <li><strong>YAML, MySQL and SQLite Backend support</strong>.</li>
+  <li><strong>YAML, MySQL, SQLite and MongoDB backend support</strong>.</li>
   <li><strong>Cached database queries</strong>.</li>
   <li><strong>Shows a realtime info about user</strong>.</li>
   <li><strong>Spawn & Lobby location</strong>.</li>
@@ -25,7 +25,7 @@ typing commands or using the inventory.
 <ul>
   <li><strong>Email recovery system</strong>.</li>
   <li><strong>Remember IP adresses</strong>.</li>
-  <li><strong>Add MongoDB and JSON backend support</strong>.</li>
+  <li><strong>Add JSON backend support</strong>.</li>
   <li><strong>Events & API for developers</strong>.</li>
   <li><strong>Add Maximum registration & Maximum connection with one IP</strong>.</li>
   <li><strong>Remove join & leave messages if player doesn't log in</strong>.</li>
