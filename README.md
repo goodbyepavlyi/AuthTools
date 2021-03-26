@@ -20,6 +20,7 @@ typing commands or using the inventory.
   <li><strong>In-Game QR Code for Authenticator App</strong>.</li>
   <li><strong>Recovery codes for players</strong>.</li>
   <li><strong>Title announcement when players login or register</strong>.</li>
+  <li><strong>Events & API for developers</strong>.</li>
 </ul>
 
 #### Planning
@@ -27,7 +28,6 @@ typing commands or using the inventory.
   <li><strong>Email recovery system</strong>.</li>
   <li><strong>Remember IP adresses</strong>.</li>
   <li><strong>Add JSON backend support</strong>.</li>
-  <li><strong>Events & API for developers</strong>.</li>
   <li><strong>Add Maximum registration & Maximum connection with one IP</strong>.</li>
   <li><strong>Add "/authtools import" command that allows you to import data from another backends to active one</strong>.</li>
 </ul>
