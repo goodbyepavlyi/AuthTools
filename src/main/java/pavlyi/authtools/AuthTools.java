@@ -45,6 +45,7 @@ import pavlyi.authtools.handlers.MessagesHandler;
 import pavlyi.authtools.handlers.QRCreate;
 import pavlyi.authtools.handlers.SpawnHandler;
 import pavlyi.authtools.handlers.User;
+import pavlyi.authtools.listeners.ApiListener;
 import pavlyi.authtools.listeners.AuthMeListener;
 import pavlyi.authtools.listeners.PlayerLoginListener;
 import pavlyi.authtools.listeners.PlayerRegisterListener;
@@ -137,252 +138,272 @@ public class AuthTools extends JavaPlugin {
 			log("&r  &cError: &fCommand &c/2fa &couldn't get registered!");
 		}
 
-		if (!isHooked()) {
-			try {
-				getPluginManager().registerEvents(new UserSetupListener(), this);
-				log("&r  &aSuccess: &fListener &cUserSetupListener &fhas been registered!");
-			} catch (Exception ex) {
-				log("&r  &cError: &fListener &cUserSetupListener &fcouldn't get registered!");
-			}
-
-			try {
-				getPluginManager().registerEvents(new StoreDataListener(), this);
-				log("&r  &aSuccess: &fListener &cStoreDataListener &fhas been registered!");
-			} catch (Exception ex) {
-				log("&r  &cError: &fListener &cStoreDataListener &fcouldn't get registered!");
-			}
-			
-			try {
-				getPluginManager().registerEvents(new PlayerLoginListener(), this);
-				log("&r  &aSuccess: &fListener &cPlayerLoginListener &fhas been registered!");
-			} catch (Exception ex) {
-				log("&r  &cError: &fListener &cPlayerLoginListener &fcouldn't get registered!");
-			}
-
-			try {
-				getPluginManager().registerEvents(new PlayerRegisterListener(), this);
-				log("&r  &aSuccess: &fListener &cPlayerRegisterListener &fhas been registered!");
-			} catch (Exception ex) {
-				log("&r  &cError: &fListener &cPlayerRegisterListener &fcouldn't get registered!");
-			}
-
-			log("&f&m-------------------------");
-
-			for (Player p : getServer().getOnlinePlayers()) {
-				User user = new User(p.getName());
-
-				if (user.get2FA()) {
-					if (getSpawnHandler().getSpawn("spawn") != null)
-			    		p.teleport(getSpawnHandler().getSpawn("spawn"));
-
-					getAuthLocked().add(p.getName());
-					getSpawnLocations().put(p.getName(), p.getLocation());
-
-					p.sendMessage(getMessagesHandler().COMMANDS_2FA_LOGIN_LOGIN_MESSAGE);
-
-					TitleAPI.clearTitle(p);
-					if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_ENABLE) {
-						if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_LOGIN)
-							return;
-
-						TitleAPI.sendTitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_TITLE);
-					}
-					
-					if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_ENABLE) {
-						if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_LOGIN)
-							return;
-
-						TitleAPI.sendSubtitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_SUBTITLE);
-					}
-
-					if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_ENABLE) {
-						if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_LOGIN)
-							return;
-
-						int taskID;
-
-						taskID = instance.getServer().getScheduler().scheduleSyncRepeatingTask(instance, new Runnable() {
-							
-							@Override
-							public void run() {
-								ActionBarAPI.sendActionBar(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_ACTIONBAR);
-							}
-						}, 0, 20);
-					}
-
-					if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT != 0) {
-						int taskID;
-
-						taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
-
-							@Override
-							public void run() {
-								p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
-							}
-
-						}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
-
-						instance.getRunnables().put(p.getName(), taskID);
-					}
-				} else {
-					instance.getSpawnLocations().put(p.getName(), p.getLocation());
-
-					if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TELEPORT_UNAUTHED_TO_SPAWN) {
-						if (instance.getSpawnHandler().getSpawn("spawn") != null)
-				    		p.teleport(instance.getSpawnHandler().getSpawn("spawn"));
-					}
-
-					instance.getRegisterLocked().add(p.getName());
-
-					GoogleAuthenticatorKey secretKey = instance.getGoogleAuthenticator().createCredentials();
-
-					user.setSettingUp2FA(true);
-					user.set2FAsecret(secretKey.getKey());
-					user.setRecoveryCode(false);		
-
-					QRCreate.create(p, secretKey.getKey());
-
-					for (String tempMessage : instance.getMessagesHandler().COMMANDS_2FA_SETUP_AUTHAPP) {
-						tempMessage = tempMessage.replace("%secretkey%", secretKey.getKey());
-						tempMessage = tempMessage.replace("%recoverycode%", String.valueOf(user.getRecoveryCode()));
-
-						p.sendMessage(tempMessage);
-					}
-
-					Inventory inv = Bukkit.createInventory(p, 36);
-					for (ItemStack is : p.getInventory().getContents()) {
-						if (is != null)
-							inv.addItem(is);
-					}
-
-					TFACommand.inventories.put(p, inv);
-
-					ItemStack qrCodeMap = new ItemStack(Material.MAP);
-					ItemMeta qrCodeMapIM = qrCodeMap.getItemMeta();
-					qrCodeMapIM.setDisplayName(instance.getMessagesHandler().COMMANDS_2FA_SETUP_QRCODE_TITLE);
-					qrCodeMapIM.setLore(instance.getMessagesHandler().COMMANDS_2FA_SETUP_QRCODE_LORE);
-					qrCodeMap.setItemMeta(qrCodeMapIM);
-
-					p.getInventory().clear();
-					p.getInventory().setHeldItemSlot(0);
-					p.getInventory().setItem(0, qrCodeMap);
-
-					MapView view = Bukkit.getMap(p.getInventory().getItem(0).getDurability());
-					Iterator<MapRenderer> iter;
-
-					if (view.getRenderers().iterator() != null) {
-						iter = view.getRenderers().iterator();
-
-						while (iter.hasNext()) {
-							view.removeRenderer(iter.next());
-						}
-
-						try {
-							ImageRenderer renderer = new ImageRenderer(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png");
-							view.addRenderer(renderer);
-
-							new File(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png").delete();
-						} catch (IOException ex) {
-							ex.printStackTrace();
-						}
-					} else {
-						view = Bukkit.getMap(p.getInventory().getItem(0).getDurability());
-						iter = view.getRenderers().iterator();
-
-						while (iter.hasNext()) {
-							view.removeRenderer(iter.next());
-						}
-
-						try {
-							ImageRenderer renderer = new ImageRenderer(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png");
-							view.addRenderer(renderer);
-
-							new File(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png").delete();
-						} catch (IOException ex) {
-							ex.printStackTrace();
-						}
-					}
-
-					TitleAPI.clearTitle(p);
-					if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_ENABLE) {
-						if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_REGISTER)
-							return;
-
-						TitleAPI.sendTitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_TITLE);
-					}
-					
-					if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_ENABLE) {
-						if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_REGISTER)
-							return;
-
-						TitleAPI.sendSubtitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_SUBTITLE);
-					}
-
-					if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_ENABLE) {
-						if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_REGISTER)
-							return;
-
-						int taskID;
-
-						taskID = instance.getServer().getScheduler().scheduleSyncRepeatingTask(instance, new Runnable() {
-							
-							@Override
-							public void run() {
-								ActionBarAPI.sendActionBar(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_ACTIONBAR);
-							}
-						}, 0, 20);
-					}
-
-					if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT != 0) {
-						int taskID;
-
-						taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
-
-							@Override
-							public void run() {
-								p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
-							}
-
-						}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
-
-						instance.getRunnables().put(p.getName(), taskID);
-					}
+		if (!getConfigHandler().SETTINGS_ACTIONS_ONLY_WITH_API) {
+			if (!isHooked()) {
+				try {
+					getPluginManager().registerEvents(new UserSetupListener(), this);
+					log("&r  &aSuccess: &fListener &cUserSetupListener &fhas been registered!");
+				} catch (Exception ex) {
+					log("&r  &cError: &fListener &cUserSetupListener &fcouldn't get registered!");
 				}
 
+				try {
+					getPluginManager().registerEvents(new StoreDataListener(), this);
+					log("&r  &aSuccess: &fListener &cStoreDataListener &fhas been registered!");
+				} catch (Exception ex) {
+					log("&r  &cError: &fListener &cStoreDataListener &fcouldn't get registered!");
+				}
 				
+				try {
+					getPluginManager().registerEvents(new PlayerLoginListener(), this);
+					log("&r  &aSuccess: &fListener &cPlayerLoginListener &fhas been registered!");
+				} catch (Exception ex) {
+					log("&r  &cError: &fListener &cPlayerLoginListener &fcouldn't get registered!");
+				}
 
-				user.create();
-				user.setIP(p.getAddress());
-				user.setUUID();
+				try {
+					getPluginManager().registerEvents(new PlayerRegisterListener(), this);
+					log("&r  &aSuccess: &fListener &cPlayerRegisterListener &fhas been registered!");
+				} catch (Exception ex) {
+					log("&r  &cError: &fListener &cPlayerRegisterListener &fcouldn't get registered!");
+				}
+
+				log("&f&m-------------------------");
+
+				for (Player p : getServer().getOnlinePlayers()) {
+					User user = new User(p.getName());
+
+					if (user.get2FA()) {
+						if (getSpawnHandler().getSpawn("spawn") != null)
+				    		p.teleport(getSpawnHandler().getSpawn("spawn"));
+
+						getAuthLocked().add(p.getName());
+						getSpawnLocations().put(p.getName(), p.getLocation());
+
+						p.sendMessage(getMessagesHandler().COMMANDS_2FA_LOGIN_LOGIN_MESSAGE);
+
+						TitleAPI.clearTitle(p);
+						if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_ENABLE) {
+							if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_LOGIN)
+								return;
+
+							TitleAPI.sendTitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_TITLE);
+						}
+						
+						if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_ENABLE) {
+							if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_LOGIN)
+								return;
+
+							TitleAPI.sendSubtitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_SUBTITLE);
+						}
+
+						if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_ENABLE) {
+							if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_LOGIN)
+								return;
+
+							int taskID;
+
+							taskID = instance.getServer().getScheduler().scheduleSyncRepeatingTask(instance, new Runnable() {
+								
+								@Override
+								public void run() {
+									ActionBarAPI.sendActionBar(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_LOGIN_ACTIONBAR);
+								}
+							}, 0, 20);
+						}
+
+						if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT != 0) {
+							int taskID;
+
+							taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
+
+								@Override
+								public void run() {
+									p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
+								}
+
+							}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+
+							instance.getRunnables().put(p.getName(), taskID);
+						}
+					} else {
+						instance.getSpawnLocations().put(p.getName(), p.getLocation());
+
+						if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TELEPORT_UNAUTHED_TO_SPAWN) {
+							if (instance.getSpawnHandler().getSpawn("spawn") != null)
+					    		p.teleport(instance.getSpawnHandler().getSpawn("spawn"));
+						}
+
+						instance.getRegisterLocked().add(p.getName());
+
+						GoogleAuthenticatorKey secretKey = instance.getGoogleAuthenticator().createCredentials();
+
+						user.setSettingUp2FA(true);
+						user.set2FAsecret(secretKey.getKey());
+						user.setRecoveryCode(false);		
+
+						QRCreate.create(p, secretKey.getKey());
+
+						for (String tempMessage : instance.getMessagesHandler().COMMANDS_2FA_SETUP_AUTHAPP) {
+							tempMessage = tempMessage.replace("%secretkey%", secretKey.getKey());
+							tempMessage = tempMessage.replace("%recoverycode%", String.valueOf(user.getRecoveryCode()));
+
+							p.sendMessage(tempMessage);
+						}
+
+						Inventory inv = Bukkit.createInventory(p, 36);
+						for (ItemStack is : p.getInventory().getContents()) {
+							if (is != null)
+								inv.addItem(is);
+						}
+
+						TFACommand.inventories.put(p, inv);
+
+						ItemStack qrCodeMap = new ItemStack(Material.MAP);
+						ItemMeta qrCodeMapIM = qrCodeMap.getItemMeta();
+						qrCodeMapIM.setDisplayName(instance.getMessagesHandler().COMMANDS_2FA_SETUP_QRCODE_TITLE);
+						qrCodeMapIM.setLore(instance.getMessagesHandler().COMMANDS_2FA_SETUP_QRCODE_LORE);
+						qrCodeMap.setItemMeta(qrCodeMapIM);
+
+						p.getInventory().clear();
+						p.getInventory().setHeldItemSlot(0);
+						p.getInventory().setItem(0, qrCodeMap);
+
+						MapView view = Bukkit.getMap(p.getInventory().getItem(0).getDurability());
+						Iterator<MapRenderer> iter;
+
+						if (view.getRenderers().iterator() != null) {
+							iter = view.getRenderers().iterator();
+
+							while (iter.hasNext()) {
+								view.removeRenderer(iter.next());
+							}
+
+							try {
+								ImageRenderer renderer = new ImageRenderer(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png");
+								view.addRenderer(renderer);
+
+								new File(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png").delete();
+							} catch (IOException ex) {
+								ex.printStackTrace();
+							}
+						} else {
+							view = Bukkit.getMap(p.getInventory().getItem(0).getDurability());
+							iter = view.getRenderers().iterator();
+
+							while (iter.hasNext()) {
+								view.removeRenderer(iter.next());
+							}
+
+							try {
+								ImageRenderer renderer = new ImageRenderer(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png");
+								view.addRenderer(renderer);
+
+								new File(instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png").delete();
+							} catch (IOException ex) {
+								ex.printStackTrace();
+							}
+						}
+
+						TitleAPI.clearTitle(p);
+						if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_ENABLE) {
+							if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_USE_IN_REGISTER)
+								return;
+
+							TitleAPI.sendTitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_TITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_TITLE);
+						}
+						
+						if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_ENABLE) {
+							if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_USE_IN_REGISTER)
+								return;
+
+							TitleAPI.sendSubtitle(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEIN, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_SUBTITLE_FADEOUT, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_SUBTITLE);
+						}
+
+						if (instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_ENABLE) {
+							if (!instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_ACTIONBAR_USE_IN_REGISTER)
+								return;
+
+							int taskID;
+
+							taskID = instance.getServer().getScheduler().scheduleSyncRepeatingTask(instance, new Runnable() {
+								
+								@Override
+								public void run() {
+									ActionBarAPI.sendActionBar(p, instance.getConfigHandler().SETTINGS_TITLE_ANNOUNCEMENT_REGISTER_ACTIONBAR);
+								}
+							}, 0, 20);
+						}
+
+						if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT != 0) {
+							int taskID;
+
+							taskID = instance.getServer().getScheduler().scheduleSyncDelayedTask(instance, new Runnable() {
+
+								@Override
+								public void run() {
+									p.kickPlayer(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_TIMED_OUT);
+								}
+
+							}, 20 * instance.getConfigHandler().SETTINGS_RESTRICTIONS_TIMEOUT);
+
+							instance.getRunnables().put(p.getName(), taskID);
+						}
+					}
+
+					
+
+					user.create();
+					user.setIP(p.getAddress());
+					user.setUUID();
+				}
+			} else {
+				if (!hookPlugin("AuthMe")) {
+					log("&r  &cError: &fPlugin &cAuthMe &fwasn't found!");
+					log("&f&m-------------------------");
+					pm.disablePlugin(this);
+
+					return;
+				}
+
+				try {
+					getPluginManager().registerEvents(new AuthMeListener(), this);
+					log("&r  &aSuccess: &fListener &cAuthMeListener &fhas been registered!");
+				} catch (Exception ex) {
+					log("&r  &cError: &fListener &cAuthMeListener &fcouldn't get registered!");
+				}
+
+				try {
+					getPluginManager().registerEvents(new UserSetupListener(), this);
+					log("&r  &aSuccess: &fListener &cUserSetupListener &fhas been registered!");
+				} catch (Exception ex) {
+					log("&r  &cError: &fListener &cUserSetupListener &fcouldn't get registered!");
+				}
+
+				try {
+					getPluginManager().registerEvents(new StoreDataListener(), this);
+					log("&r  &aSuccess: &fListener &cStoreDataListener &fhas been registered!");
+				} catch (Exception ex) {
+					log("&r  &cError: &fListener &cStoreDataListener &fcouldn't get registered!");
+				}
+
+				for (Player p : getServer().getOnlinePlayers()) {
+					User user = new User(p.getName());
+
+					user.create();
+					user.setIP(p.getAddress());
+					user.setUUID();
+				}
+
+				log("&f&m-------------------------");
 			}
 		} else {
-			if (!hookPlugin("AuthMe")) {
-				log("&r  &cError: &fPlugin &cAuthMe &fwasn't found!");
-				log("&f&m-------------------------");
-				pm.disablePlugin(this);
-
-				return;
-			}
-
+			log("&r  &aInfo: &fListening to only &cAPIs &factions!");
 			try {
-				getPluginManager().registerEvents(new AuthMeListener(), this);
-				log("&r  &aSuccess: &fListener &cAuthMeListener &fhas been registered!");
+				getPluginManager().registerEvents(new ApiListener(), this);
+				log("&r  &aSuccess: &fListener &cApiListener &fhas been registered!");
 			} catch (Exception ex) {
-				log("&r  &cError: &fListener &cAuthMeListener &fcouldn't get registered!");
-			}
-
-			try {
-				getPluginManager().registerEvents(new UserSetupListener(), this);
-				log("&r  &aSuccess: &fListener &cUserSetupListener &fhas been registered!");
-			} catch (Exception ex) {
-				log("&r  &cError: &fListener &cUserSetupListener &fcouldn't get registered!");
-			}
-
-			try {
-				getPluginManager().registerEvents(new StoreDataListener(), this);
-				log("&r  &aSuccess: &fListener &cStoreDataListener &fhas been registered!");
-			} catch (Exception ex) {
-				log("&r  &cError: &fListener &cStoreDataListener &fcouldn't get registered!");
+				log("&r  &cError: &fListener &cApiListener &fcouldn't get registered!");
 			}
 
 			for (Player p : getServer().getOnlinePlayers()) {

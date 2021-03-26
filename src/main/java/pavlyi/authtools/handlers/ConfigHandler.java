@@ -34,6 +34,7 @@ public class ConfigHandler {
 	public String CONNECTION_MONGODB_PASSWORD;
 
 	public boolean SETTINGS_HOOK_INTO_AUTHME;
+	public boolean SETTINGS_ACTIONS_ONLY_WITH_API;
 	public String SETTINGS_SERVER_NAME;
 
 	public List<String> SETTINGS_RESTRICTIONS_ALLOWED_COMMANDS = new ArrayList<String>();
@@ -120,6 +121,7 @@ public class ConfigHandler {
 		CONNECTION_MONGODB_PASSWORD = getConfig().getString("connection.mongodb.password");
 
 		SETTINGS_HOOK_INTO_AUTHME = getConfig().getBoolean("settings.hookIntoAuthMe");
+		SETTINGS_ACTIONS_ONLY_WITH_API = getConfig().getBoolean("settings.actionsOnlyWithAPI");
 		SETTINGS_SERVER_NAME = getConfig().getString("settings.serverName");
 
 		for (String tempMessage : getConfig().getStringList("settings.restrictions.allowedCommands")) {

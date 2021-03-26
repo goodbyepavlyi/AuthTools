@@ -45,6 +45,8 @@ connection:
 settings:
     # Should we hook into AuthMe?
     hookIntoAuthMe: false
+    # Enable actions only when requested by API?
+    actionsOnlyWithAPI: false
     # Enter here your server name to show when players scan QR Code
     serverName: "Minecraft Server"
 

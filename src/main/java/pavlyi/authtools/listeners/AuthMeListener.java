@@ -7,10 +7,14 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.PlayerLeashEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -370,6 +374,19 @@ public class AuthMeListener implements Listener {
 		}
 
 	}
+	
+	@EventHandler
+	public void disableMobsTargetingPlayer(EntityTargetLivingEntityEvent e) {
+		Entity entity = e.getEntity();
+		
+		if (entity.getType() == EntityType.PLAYER) {
+			Player p = (Player) e.getEntity();
+			
+			if (instance.getAuthLocked().contains(p.getName())) {
+				e.setCancelled(true);
+			}
+		}
+	}
 
 	@EventHandler
 	public void disableInteract(PlayerInteractEvent e) {
@@ -379,6 +396,19 @@ public class AuthMeListener implements Listener {
 			e.setCancelled(true);
 		}
 
+	}
+	
+	@EventHandler
+	public void disablePlayerDamagingMobs(EntityDamageByEntityEvent e) {
+		Entity entity = e.getEntity();
+
+		if (entity.getType() == EntityType.PLAYER) {
+			Player p = (Player) e.getEntity();
+			
+			if (instance.getAuthLocked().contains(p.getName())) {
+				e.setCancelled(true);
+			}
+		}
 	}
 
 	@EventHandler

@@ -391,13 +391,11 @@ public class PlayerRegisterListener implements Listener {
 	public void disableMobsTargetingPlayer(EntityTargetLivingEntityEvent e) {
 		Entity entity = e.getEntity();
 		
-		if (entity.getType() != EntityType.PLAYER) {
-			for (Player all : instance.getServer().getOnlinePlayers()) {
-				if (instance.getRegisterLocked().contains(all.getName())) {
-					if (e.getTarget().equals(all)) {
-						e.setTarget(null);
-					}
-				}
+		if (entity.getType() == EntityType.PLAYER) {
+			Player p = (Player) e.getEntity();
+			
+			if (instance.getRegisterLocked().contains(p.getName())) {
+				e.setCancelled(true);
 			}
 		}
 	}
@@ -407,10 +405,10 @@ public class PlayerRegisterListener implements Listener {
 		Entity entity = e.getEntity();
 
 		if (entity.getType() == EntityType.PLAYER) {
-			for (Player all : instance.getServer().getOnlinePlayers()) {
-				if (instance.getRegisterLocked().contains(all.getName())) {
-					e.setCancelled(true);
-				}
+			Player p = (Player) e.getEntity();
+			
+			if (instance.getRegisterLocked().contains(p.getName())) {
+				e.setCancelled(true);
 			}
 		}
 	}
