@@ -36,6 +36,8 @@ typing commands or using the inventory.
 [AuthTools config](https://github.com/pavlyi1/AuthTools/wiki/Configuration)
 #### Messages
 [AuthTools messages](https://github.com/pavlyi1/AuthTools/wiki/Messages)
+#### Wiki
+[AuthTools Wiki](https://github.com/pavlyi1/AuthTools/wiki/Home)
 #### Permissions
 <ul>
   <li><strong>authtools.*</strong> - Gives access to all admin commands.</li>
