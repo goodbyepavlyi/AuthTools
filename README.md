@@ -1,4 +1,4 @@
-# AuthTools
+# AuthTools <img src="https://github.com/pavlyi1/AuthTools/raw/main/images/pluginLogo-32.png"></img>
 **2FA Verification Addon for AuthMe or a standalone 2FA Auth Plugin**
 
 ## Description
