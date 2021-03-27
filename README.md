@@ -1,12 +1,14 @@
 # AuthTools <img src="https://github.com/pavlyi1/AuthTools/raw/main/images/pluginLogo-32.png"></img>
 **2FA Verification Addon for AuthMe & nLogin or a standalone 2FA Auth Plugin**
 
+#### [Discord Support Server](http://go.pavlyi.eu/discord) <img src="https://github.com/pavlyi1/AuthTools/blob/main/images/discordLogo.png"></img>
+
 ## Description
 
 This plugins adds a security layer on your server that helps players to keep their account secure!<br>
 
 AuthTools disallows players who aren't authenticated to do actions like placing blocks, moving,<br>
-typing commands or using the inventory.
+typing commands or using the inventory.      
 
 #### Features
 <ul>
