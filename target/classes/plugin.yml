@@ -4,7 +4,7 @@ author: Pavlyi
 website: http://www.pavlyi.eu/
 
 main: pavlyi.authtools.AuthTools
-version: 1.3
+version: 1.4
 
 prefix: AuthTools
 load: POSTWORLD

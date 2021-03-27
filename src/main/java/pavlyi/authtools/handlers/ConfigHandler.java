@@ -34,6 +34,7 @@ public class ConfigHandler {
 	public String CONNECTION_MONGODB_PASSWORD;
 
 	public boolean SETTINGS_HOOK_INTO_AUTHME;
+	public boolean SETTINGS_HOOK_INTO_NLOGIN;
 	public boolean SETTINGS_ACTIONS_ONLY_WITH_API;
 	public String SETTINGS_SERVER_NAME;
 
@@ -121,6 +122,7 @@ public class ConfigHandler {
 		CONNECTION_MONGODB_PASSWORD = getConfig().getString("connection.mongodb.password");
 
 		SETTINGS_HOOK_INTO_AUTHME = getConfig().getBoolean("settings.hookIntoAuthMe");
+		SETTINGS_HOOK_INTO_NLOGIN = getConfig().getBoolean("settings.hookIntoNLogin");
 		SETTINGS_ACTIONS_ONLY_WITH_API = getConfig().getBoolean("settings.actionsOnlyWithAPI");
 		SETTINGS_SERVER_NAME = getConfig().getString("settings.serverName");
 

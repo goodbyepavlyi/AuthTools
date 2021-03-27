@@ -1,6 +1,6 @@
 ###################################
 #                                 #
-#   AuthTools v1.3                #
+#   AuthTools v1.4                #
 #                                 #
 #   Author: Pavlyi                #
 #   Website: http://pavlyi.eu     #
@@ -45,6 +45,8 @@ connection:
 settings:
     # Should we hook into AuthMe?
     hookIntoAuthMe: false
+    # Should we hook into nLogin?
+    hookIntoNLogin: false
     # Enable actions only when requested by API?
     actionsOnlyWithAPI: false
     # Enter here your server name to show when players scan QR Code
