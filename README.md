@@ -1,7 +1,7 @@
 # AuthTools <img src="https://github.com/pavlyi1/AuthTools/raw/main/images/pluginLogo-32.png"></img>
 **2FA Verification Addon for AuthMe & nLogin or a standalone 2FA Auth Plugin**
 
-#### [Discord Support Server](http://go.pavlyi.eu/discord) <img src="https://github.com/pavlyi1/AuthTools/blob/main/images/discordLogo.png"></img>
+#### [Discord Support Server [![Discord Support Server](https://github.com/pavlyi1/AuthTools/blob/main/images/discordLogo.png)](http://go.pavlyi.eu/discord)  
 
 ## Description
 
