@@ -1,5 +1,5 @@
 # AuthTools <img src="https://github.com/pavlyi1/AuthTools/raw/main/images/pluginLogo-32.png"></img>
-**2FA Verification Addon for AuthMe or a standalone 2FA Auth Plugin**
+**2FA Verification Addon for AuthMe & nLogin or a standalone 2FA Auth Plugin**
 
 ## Description
 
@@ -10,6 +10,7 @@ typing commands or using the inventory.
 
 #### Features
 <ul>
+  <li><strong>Supports AuthMe & nLogin</strong>.</li>
   <li><strong>Disables the an "Logged in from another location" kick</strong>.</li>
   <li><strong>Fully customizable messages</strong>.</li>
   <li><strong>YAML, MySQL, SQLite and MongoDB backend support</strong>.</li>
