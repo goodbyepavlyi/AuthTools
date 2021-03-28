@@ -28,6 +28,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
@@ -123,11 +124,8 @@ public class PlayerRegisterListener implements Listener {
 			p.sendMessage(tempMessage);
 		}
 
-		Inventory inv = Bukkit.createInventory(p, 36);
-		for (ItemStack is : p.getInventory().getContents()) {
-			if (is != null)
-				inv.addItem(is);
-		}
+		Inventory inv = Bukkit.createInventory(p, InventoryType.PLAYER);
+		inv.setContents(p.getInventory().getContents());
 
 		TFACommand.inventories.put(p, inv);
 
@@ -245,6 +243,7 @@ public class PlayerRegisterListener implements Listener {
 					if (TFACommand.inventories.containsKey(p)) {
 						p.getInventory().clear();
 						p.getInventory().setContents(TFACommand.inventories.get(p).getContents());
+
 						TFACommand.inventories.remove(p);
 					}
 
@@ -290,6 +289,7 @@ public class PlayerRegisterListener implements Listener {
 			if (TFACommand.inventories.containsKey(p)) {
 				p.getInventory().clear();
 				p.getInventory().setContents(TFACommand.inventories.get(p).getContents());
+
 				TFACommand.inventories.remove(p);
 			}
 

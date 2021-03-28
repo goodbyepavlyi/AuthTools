@@ -22,7 +22,7 @@ public class QRCreate {
 	@SuppressWarnings("deprecation")
 	public static void create(Player p, String secretKey) {
 		try {
-			String qrCodeData = "otpauth://totp/"+p.getName()+"?secret="+secretKey+"&issuer="+instance.getConfigHandler().SETTINGS_HOOK_INTO_AUTHME;
+			String qrCodeData = "otpauth://totp/"+p.getName()+"?secret="+secretKey+"&issuer="+instance.getConfigHandler().SETTINGS_SERVER_NAME;
 			String filePath = instance.getDataFolder().toString()+"/tempFiles/temp-qrcode-"+p.getName()+".png";
 			String charset = "UTF-8";
 			Map<EncodeHintType, ErrorCorrectionLevel> hintMap = new HashMap<EncodeHintType, ErrorCorrectionLevel>();

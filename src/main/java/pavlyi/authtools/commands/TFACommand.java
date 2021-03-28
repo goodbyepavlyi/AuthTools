@@ -17,6 +17,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -55,6 +56,22 @@ public class TFACommand implements CommandExecutor, TabCompleter {
 						if (!user.get2FA()) {
 							GoogleAuthenticatorKey secretKey = instance.getGoogleAuthenticator().createCredentials();
 
+							ItemStack qrCodeMap = new ItemStack(Material.MAP);
+							ItemMeta qrCodeMapIM = qrCodeMap.getItemMeta();
+							qrCodeMapIM.setDisplayName(instance.getMessagesHandler().COMMANDS_2FA_SETUP_QRCODE_TITLE);
+							qrCodeMapIM.setLore(instance.getMessagesHandler().COMMANDS_2FA_SETUP_QRCODE_LORE);
+							qrCodeMap.setItemMeta(qrCodeMapIM);
+
+
+							Inventory inv = Bukkit.createInventory(p, InventoryType.PLAYER);
+							inv.setContents(p.getInventory().getContents());
+
+							inventories.put(p, inv);
+
+							p.getInventory().clear();
+							p.getInventory().setHeldItemSlot(0);
+							p.getInventory().setItem(0, qrCodeMap);
+
 							user.setSettingUp2FA(true);
 							user.set2FAsecret(secretKey.getKey());
 							user.setRecoveryCode(false);		
@@ -68,23 +85,6 @@ public class TFACommand implements CommandExecutor, TabCompleter {
 								p.sendMessage(tempMessage);
 							}
 
-							Inventory inv = Bukkit.createInventory(p, 36);
-							for (ItemStack is : p.getInventory().getContents()) {
-								if (is != null)
-									inv.addItem(is);
-							}
-
-							inventories.put(p, inv);
-
-							ItemStack qrCodeMap = new ItemStack(Material.MAP);
-							ItemMeta qrCodeMapIM = qrCodeMap.getItemMeta();
-							qrCodeMapIM.setDisplayName(instance.getMessagesHandler().COMMANDS_2FA_SETUP_QRCODE_TITLE);
-							qrCodeMapIM.setLore(instance.getMessagesHandler().COMMANDS_2FA_SETUP_QRCODE_LORE);
-							qrCodeMap.setItemMeta(qrCodeMapIM);
-
-							p.getInventory().clear();
-							p.getInventory().setHeldItemSlot(0);
-							p.getInventory().setItem(0, qrCodeMap);
 
 							MapView view = Bukkit.getMap(p.getInventory().getItem(0).getDurability());
 							Iterator<MapRenderer> iter = view.getRenderers().iterator();
@@ -107,10 +107,11 @@ public class TFACommand implements CommandExecutor, TabCompleter {
 					} else {
 							user.setSettingUp2FA(false);
 
-							if (inventories.containsKey(p)) {
+							if (TFACommand.inventories.containsKey(p)) {
 								p.getInventory().clear();
-								p.getInventory().setContents(inventories.get(p).getContents());
-								inventories.remove(p);
+								p.getInventory().setContents(TFACommand.inventories.get(p).getContents());
+
+								TFACommand.inventories.remove(p);
 							}
 
 						p.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_SETUP_SETUP_CANCELLED);

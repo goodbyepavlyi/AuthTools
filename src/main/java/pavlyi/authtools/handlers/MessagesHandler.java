@@ -102,6 +102,7 @@ public class MessagesHandler {
 			instance.getPluginManager().disablePlugin(instance);
 		}
 
+		NO_PERMISSIONS = instance.color(getConfig().getString("noPermissions"));
 		PLUGIN_RELOADED = instance.color(getConfig().getString("pluginReloaded"));
 		PLAYER_NOT_FOUND = instance.color(getConfig().getString("playerNotFound"));
 		ONLY_PLAYER_CAN_EXECUTE_COMMAND = instance.color(getConfig().getString("onlyPlayerCanExecuteCommand"));

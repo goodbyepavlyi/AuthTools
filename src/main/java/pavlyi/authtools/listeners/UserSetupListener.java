@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 
@@ -36,6 +37,7 @@ public class UserSetupListener implements Listener {
 		            if (TFACommand.inventories.containsKey(p)) {
 						p.getInventory().clear();
 						p.getInventory().setContents(TFACommand.inventories.get(p).getContents());
+
 						TFACommand.inventories.remove(p);
 					}
 
@@ -64,6 +66,7 @@ public class UserSetupListener implements Listener {
 			if (TFACommand.inventories.containsKey(p)) {
 				p.getInventory().clear();
 				p.getInventory().setContents(TFACommand.inventories.get(p).getContents());
+
 				TFACommand.inventories.remove(p);
 			}
 		}

@@ -7,6 +7,7 @@
 #                                 #
 ###################################
 
+noPermissions: "&f[&cAuthTools&f] &fNo permissions!"
 pluginReloaded: "&f[&cAuthTools&f] &cAuthTools &fconfiguration was reloaded!"
 playerNotFound: "&f[&cAuthTools&f] &c%player% &fwas not found!"
 onlyPlayerCanExecuteCommand: "&f[&cAuthTools&f] &fOnly player can execute this command!"
