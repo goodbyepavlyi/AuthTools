@@ -23,6 +23,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
+import com.connorlinfoot.titleapi.TitleAPI;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 
@@ -136,6 +137,16 @@ public class TFACommand implements CommandExecutor, TabCompleter {
 
 										if (instance.getAuthLocked().contains(p.getName()))
 											instance.getAuthLocked().remove(p.getName());
+
+										if (instance.getRunnables().get(p.getName()) != null)
+											instance.getServer().getScheduler().cancelTask(instance.getRunnables().get(p.getName()));
+
+										TitleAPI.clearTitle(p);
+
+										if (instance.getActionBarRunnables().get(p.getName()) != null) {
+						        			instance.getServer().getScheduler().cancelTask(instance.getActionBarRunnables().get(p.getName()));
+											instance.getActionBarRunnables().remove(p.getName(), instance.getActionBarRunnables().get(p.getName()));							
+										}
 
 										instance.getPluginManager().callEvent(new AuthToolsPlayerRecovered2FAEvent(p, code, true));
 
