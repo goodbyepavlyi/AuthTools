@@ -1,4 +1,4 @@
-# AuthTools <img src="https://github.com/pavlyi1/AuthTools/raw/main/images/pluginLogo-32.png"></img>
+# AuthTools & AuthToolsBungee <img src="https://github.com/pavlyi1/AuthTools/raw/main/images/pluginLogo-32.png"></img>
 **2FA Verification Addon for AuthMe & nLogin or a standalone 2FA Auth Plugin**
 
 [Discord Support Server](https://go.pavlyi.eu/discord)
@@ -24,20 +24,28 @@ typing commands or using the inventory.
   <li><strong>Recovery codes for players</strong>.</li>
   <li><strong>Title announcement when players login or register</strong>.</li>
   <li><strong>Events & API for developers</strong>.</li>
+  <li><strong>Added '/authtools import' command that allows you to import data from another backends to active one</strong>.</li>
 </ul>
 
 #### Planning
 <ul>
-  <li><strong>Create a Email, Discord & Telegram Recovery bot</strong>.</li>
-  <li><strong>Add "/authtools import" command that allows you to import data from another backends to active one</strong>.</li>
+  <li><strong>Create a Email, Discord & Telegram that allows you to control unknown attemps on account and a recovery service</strong>.</li>
 </ul>
 
 #### Configuration
-[AuthTools config](https://github.com/pavlyi1/AuthTools/wiki/Configuration)
+[AuthTools](https://github.com/pavlyi1/AuthTools/wiki/AuthTools-Configuration)<br>
+[AuthToolsBungee](https://github.com/pavlyi1/AuthTools/wiki/AuthToolsBungee-Configuration)
+
 #### Messages
-[AuthTools messages](https://github.com/pavlyi1/AuthTools/wiki/Messages)
+[AuthTools](https://github.com/pavlyi1/AuthTools/wiki/AuthTools-Messages)
+
+#### Registration Types
+[AuthTools Registration Types](https://github.com/pavlyi1/AuthTools/wiki/AuthTools-Registration)
+
 #### Wiki
-[AuthTools Wiki](https://github.com/pavlyi1/AuthTools/wiki/Home)
+[AuthTools](https://github.com/pavlyi1/AuthTools/wiki/AuthTools-Home)<br>
+[AuthToolsBungee](https://github.com/pavlyi1/AuthTools/wiki/AuthToolsBungee-Home)
+
 #### Permissions
 <ul>
   <li><strong>authtools.*</strong> - Gives access to all admin commands.</li>
@@ -49,4 +57,5 @@ typing commands or using the inventory.
   <li><strong>authtools.use.info</strong> - Gives access to use the info command</li>
   <li><strong>authtools.use.setspawn</strong> - Gives access to use the setspawn command</li>
   <li><strong>authtools.use.setlobby</strong> - Gives access to use the setlobby command</li>
+  <li><strong>authtools.use.import</strong> - Gives access to use the import command</li>
 </ul>
