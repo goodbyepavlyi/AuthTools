@@ -11,26 +11,26 @@ AuthTools disallows players who aren't authenticated to do actions like placing 
 typing commands or using the inventory.      
 
 #### Features
-<ul>
-  <li><strong>Supports AuthMe & nLogin</strong>.</li>
-  <li><strong>Disables the an "Logged in from another location" kick</strong>.</li>
-  <li><strong>Fully customizable messages</strong>.</li>
-  <li><strong>YAML, MySQL, SQLite and MongoDB backend support</strong>.</li>
-  <li><strong>Cached database queries</strong>.</li>
-  <li><strong>Shows a realtime info about user</strong>.</li>
-  <li><strong>Spawn & Lobby location</strong>.</li>
-  <li><strong>Admins can reset others players 2FA</strong>.</li>
-  <li><strong>In-Game QR Code for Authenticator App</strong>.</li>
-  <li><strong>Recovery codes for players</strong>.</li>
-  <li><strong>Title announcement when players login or register</strong>.</li>
-  <li><strong>Events & API for developers</strong>.</li>
-  <li><strong>Added '/authtools import' command that allows you to import data from another backends to active one</strong>.</li>
-</ul>
+
+* <strong>Supports AuthMe & nLogin</strong>.
+* <strong>Disables the an "Logged in from another location" kick</strong>.
+* <strong>Fully customizable messages</strong>.
+* <strong>YAML, MySQL, SQLite and MongoDB backend support</strong>.
+* <strong>Cached database queries</strong>.
+* <strong>Shows a realtime info about user</strong>.
+* <strong>Spawn & Lobby location</strong>.
+* <strong>Admins can reset others players 2FA</strong>.
+* <strong>In-Game QR Code for Authenticator App</strong>.
+* <strong>Recovery codes for players</strong>.
+* <strong>Title announcement when players login or register</strong>.
+* <strong>Events & API for developers</strong>.
+* <strong>Added '/authtools import' command that allows you to import data from another backends to active one</strong>.
+
 
 #### Planning
-<ul>
-  <li><strong>Create a Email, Discord & Telegram that allows you to control unknown attemps on account and a recovery service</strong>.</li>
-</ul>
+
+* <strong>Create a Email, Discord & Telegram that allows you to control unknown attemps on account and a recovery service</strong>.
+
 
 #### Configuration
 [AuthTools](https://github.com/pavlyi1/AuthTools/wiki/AuthTools-Configuration)<br>
@@ -47,15 +47,19 @@ typing commands or using the inventory.
 [AuthToolsBungee](https://github.com/pavlyi1/AuthTools/wiki/AuthToolsBungee-Home)
 
 #### Permissions
-<ul>
-  <li><strong>authtools.*</strong> - Gives access to all admin commands.</li>
-  <li><strong>authtools.use</strong> - Gives access to use command</li>
-  <li><strong>authtools.use.reload</strong> - Gives access to use the reload command</li>
-  <li><strong>authtools.use.about</strong> - Gives access to use the about command</li>
-  <li><strong>authtools.use.reset</strong> - Gives access to use the reset command</li>
-  <li><strong>authtools.use.backend</strong> - Gives access to use the backend command</li>
-  <li><strong>authtools.use.info</strong> - Gives access to use the info command</li>
-  <li><strong>authtools.use.setspawn</strong> - Gives access to use the setspawn command</li>
-  <li><strong>authtools.use.setlobby</strong> - Gives access to use the setlobby command</li>
-  <li><strong>authtools.use.import</strong> - Gives access to use the import command</li>
-</ul>
+
+* <strong>authtools.*</strong> - Gives access to all admin commands.
+* <strong>authtools.use</strong> - Gives access to use command
+* <strong>authtools.use.reload</strong> - Gives access to use the reload command
+* <strong>authtools.use.about</strong> - Gives access to use the about command
+* <strong>authtools.use.reset</strong> - Gives access to use the reset command
+* <strong>authtools.use.backend</strong> - Gives access to use the backend command
+* <strong>authtools.use.info</strong> - Gives access to use the info command
+* <strong>authtools.use.setspawn</strong> - Gives access to use the setspawn command
+* <strong>authtools.use.setlobby</strong> - Gives access to use the setlobby command
+* <strong>authtools.use.import</strong> - Gives access to use the import command
+
+
+#### Terms of Conditions
+* No stupid reviews, such as (the developer isn't adding features i request).
+* I'm not obligated to do updates at a specific time, but that doesn't mean I wont do updates.
