@@ -40,7 +40,7 @@ typing commands or using the inventory.
 [AuthTools](https://github.com/pavlyi1/AuthTools/wiki/AuthTools-Messages)
 
 #### Registration Types
-[AuthTools Registration Types](https://github.com/pavlyi1/AuthTools/wiki/AuthTools-Registration)
+[AuthTools](https://github.com/pavlyi1/AuthTools/wiki/AuthTools-Registration)
 
 #### Wiki
 [AuthTools](https://github.com/pavlyi1/AuthTools/wiki/AuthTools-Home)<br>
