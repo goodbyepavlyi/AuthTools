@@ -28,10 +28,7 @@ typing commands or using the inventory.
 
 #### Planning
 <ul>
-  <li><strong>Email recovery system</strong>.</li>
-  <li><strong>Remember IP adresses</strong>.</li>
-  <li><strong>Add JSON backend support</strong>.</li>
-  <li><strong>Add Maximum registration & Maximum connection with one IP</strong>.</li>
+  <li><strong>Create a Email, Discord & Telegram Recovery bot</strong>.</li>
   <li><strong>Add "/authtools import" command that allows you to import data from another backends to active one</strong>.</li>
 </ul>
 
