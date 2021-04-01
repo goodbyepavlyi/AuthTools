@@ -1,0 +1,27 @@
+###################################
+#                                 #
+#   AuthToolsBungee               #
+#                                 #
+#   Author: Pavlyi                #
+#   Website: http://pavlyi.eu     #
+#                                 #
+###################################
+
+# List of servers that you need to be authenticated.
+authServers:
+- "auth"
+- "lobby"
+
+# Disable players to perform commands when player needs to authenticate.
+commandsRequireAuth: true
+
+# List of commands allowed to be performed without being authenticated.
+whitelistedCommands:
+- "/login"
+- "/register"
+- "/2fa recover"
+
+# Disable server switching when player isn't authorized
+serverSwitchRequiresAuth: true
+# Server switch kick message
+serverSwitchRequiresAuthKickMessage: "&cAuthorization required!"

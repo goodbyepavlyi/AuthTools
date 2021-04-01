@@ -1,0 +1,18 @@
+name: AuthTools
+description: AuthTools is a plugin to make your server more secure and efficient!
+author: Pavlyi
+website: http://www.pavlyi.eu/
+
+main: pavlyi.authtools.AuthTools
+version: 1.6
+
+prefix: AuthTools
+load: POSTWORLD
+
+softdepend: [nLogin, AuthMe]
+
+commands:
+    authtools:
+    2fa:
+        aliases: [tfa]
+
