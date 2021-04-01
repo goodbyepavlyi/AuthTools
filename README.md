@@ -60,6 +60,6 @@ typing commands or using the inventory.
 * <strong>authtools.use.import</strong> - Gives access to use the import command
 
 
-#### Terms of Conditions
+## Terms of Conditions
 * No stupid reviews, such as (the developer isn't adding features i request).
 * I'm not obligated to do updates at a specific time, but that doesn't mean I wont do updates.
