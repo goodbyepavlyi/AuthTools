@@ -1,7 +1,7 @@
 # AuthTools & AuthToolsBungee <img src="https://github.com/pavlyi1/AuthTools/raw/main/images/pluginLogo-32.png"></img>
 **2FA Verification Addon for AuthMe & nLogin or a standalone 2FA Auth Plugin**
 
-[Discord Support Server](https://go.pavlyi.eu/discord)
+### Plugin Discontinued
 
 ## Description
 
@@ -25,12 +25,6 @@ typing commands or using the inventory.
 * <strong>Title announcement when players login or register</strong>.
 * <strong>Events & API for developers</strong>.
 * <strong>Added '/authtools import' command that allows you to import data from another backends to active one</strong>.
-
-
-#### Planning
-
-* <strong>Create a Email, Discord & Telegram that allows you to control unknown attemps on account and a recovery service</strong>.
-
 
 #### Configuration
 [AuthTools](https://github.com/pavlyi1/AuthTools/wiki/AuthTools-Configuration)<br>
