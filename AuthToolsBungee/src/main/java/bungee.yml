@@ -1,7 +1,0 @@
-name: AuthToolsBungee
-description: AuthToolsBungee is a plugin to secure your proxy.
-author: Pavlyi
-website: http://www.pavlyi.eu/
-
-main: pavlyi.authtoolsbungee.AuthToolsBungee
-version: 1.0

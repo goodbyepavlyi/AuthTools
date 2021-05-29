@@ -1,0 +1,24 @@
+name: AuthTools
+description: Brings authentication to players that is more secure and efficient!
+author: Pavlyi
+website: https://www.pavlyi.eu/
+
+main: pavlyi.authtools.spigot.AuthTools
+version: 1.7
+
+api-version: 1.13
+load: POSTWORLD
+
+softdepend: [nLogin, AuthMe]
+
+commands:
+    authtools:
+        description: Command for controlling the whole plugin
+        permission: authtools.command.use
+
+    2fa:
+        description: Command for controlling the 2FA.
+
+permissions:
+    authtools.*:
+        children:

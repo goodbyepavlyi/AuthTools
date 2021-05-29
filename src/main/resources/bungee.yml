@@ -1,0 +1,7 @@
+name: AuthToolsBungee
+description: Brings authentication to Proxy servers and makes them more secure and efficient!
+author: Pavlyi
+website: https://www.pavlyi.eu/
+
+main: pavlyi.authtools.bungee.AuthToolsBungee
+version: 1.7

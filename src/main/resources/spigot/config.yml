@@ -1,0 +1,137 @@
+###################################
+#                                 #
+#   AuthTools                     #
+#                                 #
+#   Author: Pavlyi                #
+#   Website: https://pavlyi.eu    #
+#                                 #
+###################################
+
+connection:
+  # What type of database do you want to use?
+  # Valid: YAML, SQLITE, MYSQL, MONGODB
+  type: YAML
+
+  yaml:
+    # YAML file name
+    fileName: playerData.yml
+
+  sqlite:
+    # SQLite file name
+    fileName: sqlite.db
+
+  mysql:
+    # MySQL host address
+    hostname: localhost
+    # MySQL port
+    port: 3306
+    # MySQL database
+    database: database
+    # MySQL username
+    username: username
+    # MySQL password
+    password: password
+    # MySQL options
+    options: "?autoReconnect=true&useSSL=false&serverTimezone=UTC"
+
+  mongodb:
+    # MongoDB cluster
+    cluster: cluster
+    # MongoDB database
+    database: database
+    # MongoDB username
+    username: username
+    # MongoDB password
+    password: password
+
+hook:
+  # How should the plugin act
+  # STANDALONE - An single authentication plugin
+  # API - Listens only for API actions
+  # AUTHME - Hooks into AuthMe
+  # NLOGIN - Hooks into nLogin
+  type: STANDALONE
+
+  # If set to true, you will be able to send player to server after logging, disable players from using proxy commands when not logged in, etc.
+  bungeeCord: false
+
+  # Request register after authentication in other hooked plugins?
+  registerAfterAuthentication: true
+
+qrcode:
+  # Here you can enter anything to show in Authenticator App.
+  name: "Minecraft Server"
+
+settings:
+  # Send player to BungeeCord server after register/login.
+  # Leave blank if you want to disable this feature.
+  sendPlayerTo: ''
+
+  restrictions:
+    # Allowed commands to do even when not logged in
+    allowedCommands:
+      - "2fa recover"
+    # After how many seconds should players who fail to login or register be kicked?
+    # Set to 0 to disable.
+    timeout: 30
+    # When this setting is enabled, so that players can't be kicked
+    # due to "Logged in from another Location"
+    forceSingleSession: true
+    # Should players be kicked on wrong 2fa code?
+    kickOnWrong2FAcode: false
+    # Should players when they join get teleported to spawn
+    teleportUnAuthedToSpawn: false
+    # Can unregistered players walk around?
+    allowMovement: false
+    # How far can players walk?
+    # Set to 0 for unlimited radius
+    allowedMovementRadius: 100
+
+  announcement:
+    title:
+      # Enables the title
+      enable: true
+      # Makes a fade in for title
+      fadeIn: 20
+      # Makes a fade out for title
+      fadeOut: 20
+
+      # Enable if you want title in register
+      useInRegister: true
+      # Enable if you want title in login
+      useInLogin: true
+
+    subtitle:
+      # Enables the title
+      enable: true
+      # Makes a fade in for title
+      fadeIn: 20
+      # Makes a fade out for title
+      fadeOut: 20
+
+      # Enable if you want title in register
+      useInRegister: true
+      # Enable if you want title in login
+      useInLogin: true
+
+    actionbar:
+      # Enables the title
+      enable: true
+
+      # Enable if you want title in register
+      useInRegister: true
+      # Enable if you want title in login
+      useInLogin: true
+
+    register:
+      title: ""
+      subtitle: ""
+      actionbar: "&cRegister &f- Enter &csecret key &finto &capp &for scan the &cQR Code&f!"
+
+    login:
+      title: "&c&lLogin"
+      subtitle: ""
+      actionbar: "&fEnter &cverification code &ffrom &cAuthenticator app&f!"
+      actionbars: "1&fEnter &cverification code &ffrom &cAuthenticator app&f!"
+
+config-version: 1.7
