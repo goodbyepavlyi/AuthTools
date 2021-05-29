@@ -48,6 +48,6 @@ public class AsyncRecoverEvent extends Event {
     }
 
     public InformationType getResettedType() {
-        return sucessfullRecover;
+        return resettedType;
     }
 }

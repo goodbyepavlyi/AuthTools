@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="AuthTools:jar">
-    <output-path>$PROJECT_DIR$/../../../Servers/Test Servers/BungeeCord/plugins</output-path>
+    <output-path>$PROJECT_DIR$/../../../Plugins/AuthTools/Versions/AuthTools-v1.7.jar</output-path>
     <root id="archive" name="AuthTools.jar">
       <element id="module-output" name="AuthTools" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/mongodb/bson/3.11.3/bson-3.11.3.jar" path-in-jar="/" />
