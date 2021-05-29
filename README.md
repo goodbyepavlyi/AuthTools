@@ -4,7 +4,7 @@
 </p>
 <br />
  
-![ Description](https://i.imgur.com/T5O7TYV.png)
+![Description](https://i.imgur.com/T5O7TYV.png)
 * **AuthTools adds a security layer on your server that keeps player accounts secure!**
 * **AuthTools disallows players who aren't authenticated to do actions like placing blocks, moving, typing commands, or using the inventory.**
  <br />
