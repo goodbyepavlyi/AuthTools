@@ -27,7 +27,7 @@
 ![Coming Features](https://i.imgur.com/9HnczE1.png)
 * **Password protection**
 * **Sessions**
-* **Recovery through Email or Discord that will allow to control unknown attempts on the account**
+* **Recovery through Email or Discord will allow controlling unknown attempts on the account**
 <br />
  
 ![Wiki](https://i.imgur.com/D8RPaEd.png)
