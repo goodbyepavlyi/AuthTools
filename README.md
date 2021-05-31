@@ -27,7 +27,7 @@
 ![Coming Features](https://i.imgur.com/9HnczE1.png)
 * **Password protection**
 * **Sessions**
-* **Create an Email, Discord & Telegram that allows you to control unknown attempts on the account and a recovery service**
+* **Recovery through Email or Discord that will allow to control unknown attempts on the account**
 <br />
  
 ![Wiki](https://i.imgur.com/D8RPaEd.png)
