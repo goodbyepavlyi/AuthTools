@@ -1,6 +1,5 @@
 <p align="center">
-  <img width="auto" height="auto" src="https://i.imgur.com/PuLKOmu.png" alt="Introduction">
-  ___________________________________________________________________________________________________
+  <img width="auto" height="auto" src="https://i.imgur.com/hZ7P3Lw.png" alt="Introduction">
 </p>
 <br />
  
