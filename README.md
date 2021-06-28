@@ -9,7 +9,6 @@
  <br />
  
 ![Features](https://i.imgur.com/edH29NJ.png)
-* **Supports hooking into AuthMe and nLogin**
 * **Disables the "Logged in from another location" kick.**
 * **Fully customizable messages.**
 * **YAML, MySQL, SQLite, and MongoDB backend support.**
@@ -22,7 +21,7 @@
 * **Title and ActionBar announcement.**
 * **Events & API for developers.**
 * **Sessions**
-* **Recovery through Email or Recovery code incase of lost authenticator.**
+* **Recovery through Email or Recovery code in case of lost authenticator.**
 <br />
  
 ![Coming Features](https://i.imgur.com/9HnczE1.png)
