@@ -24,10 +24,6 @@
 * **Recovery through Email or Recovery code in case of lost authenticator.**
 <br />
  
-![Coming Features](https://i.imgur.com/9HnczE1.png)
-* **Recovery through Discord**
-<br />
- 
 ![Wiki](https://i.imgur.com/D8RPaEd.png)
 * **[Home Page](https://github.com/pavlyi1/AuthTools/wiki)**
 * **[Configuration](https://github.com/pavlyi1/AuthTools/wiki/Configuration)**
