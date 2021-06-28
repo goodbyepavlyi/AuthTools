@@ -21,12 +21,12 @@
 * **Recovery codes in case of lost Authenticator.**
 * **Title and ActionBar announcement.**
 * **Events & API for developers.**
+* **Sessions**
+* **Recovery through Email or Recovery code incase of lost authenticator.**
 <br />
  
 ![Coming Features](https://i.imgur.com/9HnczE1.png)
-* **Password protection**
-* **Sessions**
-* **Recovery through Email or Discord will allow controlling unknown attempts on the account**
+* **Recovery through Discord**
 <br />
  
 ![Wiki](https://i.imgur.com/D8RPaEd.png)
