@@ -1,6 +1,5 @@
 <p align="center">
-  <img width="auto" height="auto" src="https://i.imgur.com/PuLKOmu.png" alt="Introduction">
-  ___________________________________________________________________________________________________
+  <img width="auto" height="auto" src="https://i.imgur.com/hZ7P3Lw.png" alt="Introduction">
 </p>
 <br />
 
@@ -12,8 +11,6 @@
   <br />
 
 ![Features](https://i.imgur.com/edH29NJ.png)
-
-* **Supports hooking into AuthMe and nLogin**
 * **Disables the "Logged in from another location" kick.**
 * **Fully customizable messages.**
 * **YAML, MySQL, SQLite, and MongoDB backend support.**
@@ -25,16 +22,10 @@
 * **Recovery codes in case of lost Authenticator.**
 * **Title and ActionBar announcement.**
 * **Events & API for developers.**
-  <br />
-
-![Coming Features](https://i.imgur.com/9HnczE1.png)
-
-* **Password protection**
 * **Sessions**
-* **Create an Email, Discord & Telegram that allows you to control unknown attempts on the account and a recovery
-  service**
-  <br />
-
+* **Recovery through Email or Recovery code in case of lost authenticator.**
+<br />
+ 
 ![Wiki](https://i.imgur.com/D8RPaEd.png)
 
 * **[Home Page](https://github.com/pavlyi1/AuthTools/wiki)**
