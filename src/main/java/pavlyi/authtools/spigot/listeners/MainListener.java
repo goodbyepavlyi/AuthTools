@@ -14,37 +14,39 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.*;
 import pavlyi.authtools.spigot.AuthTools;
-import pavlyi.authtools.spigot.enums.HookType;
-import pavlyi.authtools.spigot.handlers.AuthHandler;
-import pavlyi.authtools.spigot.handlers.User;
-import pavlyi.authtools.spigot.handlers.VariablesHandler;
+import pavlyi.authtools.spigot.authentication.AuthHandler;
+import pavlyi.authtools.spigot.authentication.User;
+import pavlyi.authtools.spigot.storages.Variables;
 
 public class MainListener implements Listener {
     private final AuthTools instance = AuthTools.getInstance();
 
     @EventHandler
-    public void requestAuthentication(PlayerJoinEvent e) {
-        if (VariablesHandler.getHookType().equals(HookType.STANDALONE)) {
-            Player player = e.getPlayer();
-            AuthHandler authHandler = new AuthHandler(player);
+    public void requestAuthentication(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        User user = Variables.getUser(player.getUniqueId());
+        AuthHandler authHandler = new AuthHandler(player);
 
-            authHandler.requestAuthentication();
-        }
+        if (user.getSession() != null)
+            if (!user.getSession().getIP().getHostName().equals(player.getAddress().getHostName()) || System.currentTimeMillis() >= user.getSession().getTime())
+                user.setSession(0);
+
+        authHandler.requestAuthentication();
     }
 
     @EventHandler
-    public void verifyCode(AsyncPlayerChatEvent e) {
-        Player player = e.getPlayer();
-        User user = new User(player.getName());
+    public void verifyCode(AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        User user = Variables.getUser(player.getUniqueId());
 
         if (user.hasToBeAuthenticated()) {
-            e.setCancelled(true);
+            event.setCancelled(true);
 
             AuthHandler authHandler = new AuthHandler(player);
 
-            String code = e.getMessage().replaceAll(" ", "");
+            String code = event.getMessage().replaceAll(" ", "");
 
-            if (!user.get2FA() && user.getSettingUp2FA()) {
+            if (!user.get2FA() && user.isSettingUp2FA()) {
                 switch (authHandler.register(code)) {
                     case FAILED:
                     case INVALID_CODE:
@@ -67,7 +69,7 @@ public class MainListener implements Listener {
                 return;
             }
 
-            if (user.get2FA() && !user.getSettingUp2FA()) {
+            if (user.get2FA() && !user.isSettingUp2FA()) {
                 switch (authHandler.login(code)) {
                     case TFA_LOGGED:
                         player.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_LOGGED_IN);
@@ -89,21 +91,20 @@ public class MainListener implements Listener {
     }
 
     @EventHandler
-    public void storeDefaultData(PlayerJoinEvent e) {
-        Player player = e.getPlayer();
-        User user = new User(player.getName());
+    public void storeDefaultData(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        User user = Variables.getUser(player.getUniqueId());
 
         user.create();
         user.setIP(player.getAddress());
-        user.setUUID();
     }
 
     @EventHandler
-    public void cancelSetup(PlayerQuitEvent e) {
-        Player player = e.getPlayer();
-        User user = new User(player.getName());
+    public void cancelSetup(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        User user = Variables.getUser(player.getUniqueId());
 
-        if (user.getSettingUp2FA()) {
+        if (user.isSettingUp2FA()) {
             user.setSettingUp2FA(false);
             user.set2FA(false);
             user.set2FAsecret(null);
@@ -116,235 +117,236 @@ public class MainListener implements Listener {
     }
 
     @EventHandler
-    public void disableCommands(PlayerCommandPreprocessEvent e) {
-        Player player = e.getPlayer();
+    public void disableCommands(PlayerCommandPreprocessEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated()) {
-            if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_ALLOWED_COMMANDS.stream().noneMatch((s) -> e.getMessage().replaceFirst("/", "").startsWith(s))) {
-                e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated()) {
+            if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_ALLOWED_COMMANDS.stream().noneMatch((s) -> event.getMessage().replaceFirst("/", "").startsWith(s))) {
+                event.setCancelled(true);
                 player.sendMessage(instance.getMessagesHandler().COMMANDS_2FA_LOGIN_DENIED_COMMAND);
                 return;
             }
 
-            e.setCancelled(false);
+            event.setCancelled(false);
         }
 
     }
 
     @EventHandler
-    public void disableArmorStandManipulate(PlayerArmorStandManipulateEvent e) {
-        Player player = e.getPlayer();
+    public void disableArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableDamage(EntityDamageEvent e) {
-        Entity entity = e.getEntity();
+    public void disableDamage(EntityDamageEvent event) {
+        Entity entity = event.getEntity();
 
         if (entity.getType() == EntityType.PLAYER) {
-            Player player = (Player) e.getEntity();
+            Player player = (Player) event.getEntity();
 
-            if (new User(player.getName()).hasToBeAuthenticated())
-                e.setCancelled(true);
+            if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+                event.setCancelled(true);
         }
     }
 
     @EventHandler
-    public void disablePlayerDamagingEntities(EntityDamageByEntityEvent e) {
-        if (e.getDamager().getType() == EntityType.PLAYER) {
-            Player player = (Player) e.getDamager();
+    public void disablePlayerDamagingEntities(EntityDamageByEntityEvent event) {
+        if (event.getDamager().getType() == EntityType.PLAYER) {
+            Player player = (Player) event.getDamager();
 
-            if (new User(player.getName()).hasToBeAuthenticated())
-                e.setCancelled(true);
+            if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+                event.setCancelled(true);
         }
     }
 
     @EventHandler
-    public void disableBedEnter(PlayerBedEnterEvent e) {
-        Player player = e.getPlayer();
+    public void disableBedEnter(PlayerBedEnterEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableBucketEmpty(PlayerBucketEmptyEvent e) {
-        Player player = e.getPlayer();
+    public void disableBucketEmpty(PlayerBucketEmptyEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableBucketFill(PlayerBucketFillEvent e) {
-        Player player = e.getPlayer();
+    public void disableBucketFill(PlayerBucketFillEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableMobsTargetingPlayer(EntityTargetLivingEntityEvent e) {
-        Entity entity = e.getEntity();
+    public void disableMobsTargetingPlayer(EntityTargetLivingEntityEvent event) {
+        Entity entity = event.getEntity();
 
         if (entity.getType() == EntityType.PLAYER) {
-            Player player = (Player) e.getEntity();
+            Player player = (Player) event.getEntity();
 
-            if (new User(player.getName()).hasToBeAuthenticated())
-                e.setCancelled(true);
+            if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+                event.setCancelled(true);
         }
     }
 
     @EventHandler
-    public void disablePlayerDamagingMobs(EntityDamageByEntityEvent e) {
-        Entity entity = e.getEntity();
+    public void disablePlayerDamagingMobs(EntityDamageByEntityEvent event) {
+        Entity entity = event.getEntity();
 
         if (entity.getType() == EntityType.PLAYER) {
             Player player = (Player) entity;
 
-            if (new User(player.getName()).hasToBeAuthenticated())
-                e.setCancelled(true);
+            if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+                event.setCancelled(true);
         }
     }
 
     @EventHandler
-    public void disableDeathEvent(PlayerDeathEvent e) {
-        Entity entity = e.getEntity();
+    public void disableDeathEvent(PlayerDeathEvent event) {
+        Entity entity = event.getEntity();
 
         if (entity.getType() == EntityType.PLAYER) {
-            Player player = e.getEntity();
+            Player player = event.getEntity();
 
-            if (new User(player.getName()).hasToBeAuthenticated()) {
-                e.setKeepInventory(true);
-                e.setDeathMessage(null);
+            if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated()) {
+                event.setKeepInventory(true);
+                event.setDeathMessage(null);
                 player.setHealth(player.getHealthScale());
             }
         }
     }
 
     @EventHandler
-    public void disableDropItem(PlayerDropItemEvent e) {
-        Player player = e.getPlayer();
+    public void disableDropItem(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableEditBook(PlayerEditBookEvent e) {
-        Player player = e.getPlayer();
+    public void disableEditBook(PlayerEditBookEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableExpChangeEvent(PlayerExpChangeEvent e) {
-        Player player = e.getPlayer();
+    public void disableExpChangeEvent(PlayerExpChangeEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setAmount(0);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setAmount(0);
     }
 
     @EventHandler
-    public void disableFishEvent(PlayerFishEvent e) {
-        Player player = e.getPlayer();
+    public void disableFishEvent(PlayerFishEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableGameModeChange(PlayerGameModeChangeEvent e) {
-        Player player = e.getPlayer();
+    public void disableGameModeChange(PlayerGameModeChangeEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableInteractAtEntity(PlayerInteractAtEntityEvent e) {
-        Player player = e.getPlayer();
+    public void disableInteractAtEntity(PlayerInteractAtEntityEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableInteractEntity(PlayerInteractEntityEvent e) {
-        Player player = e.getPlayer();
+    public void disableInteractEntity(PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableInteract(PlayerInteractEvent e) {
-        Player player = e.getPlayer();
+    public void disableInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableItemConsume(PlayerItemConsumeEvent e) {
-        Player player = e.getPlayer();
+    public void disableItemConsume(PlayerItemConsumeEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableItemDamage(PlayerItemDamageEvent e) {
-        Player player = e.getPlayer();
+    public void disableItemDamage(PlayerItemDamageEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableItemHeld(PlayerItemHeldEvent e) {
-        Player player = e.getPlayer();
+    public void disableItemHeld(PlayerItemHeldEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableLevelChange(PlayerLevelChangeEvent e) {
-        Player player = e.getPlayer();
+    public void disableLevelChange(PlayerLevelChangeEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            player.setLevel(e.getOldLevel());
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            player.setLevel(event.getOldLevel());
     }
 
     @EventHandler
-    public void disableLeashEntity(PlayerLeashEntityEvent e) {
-        Player player = e.getPlayer();
+    public void disableLeashEntity(PlayerLeashEntityEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableMoveEvent(PlayerMoveEvent e) {
-        Player player = e.getPlayer();
+    public void disableMoveEvent(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        User user = Variables.getUser(player.getUniqueId());
 
-        if (new User(player.getName()).hasToBeAuthenticated()) {
+        if (user.hasToBeAuthenticated()) {
             Location playerLocation = player.getLocation();
 
             int playerX = playerLocation.getBlockX();
             int playerY = playerLocation.getBlockY();
             int playerZ = playerLocation.getBlockZ();
 
-            if (VariablesHandler.getPlayerSpawnLocations().get(player.getUniqueId()) == null) {
+            if (user.getSpawnLocation() == null) {
                 player.teleport(new Location(playerLocation.getWorld(), (playerX + 0.5), playerY, (playerZ + 0.5)));
                 return;
             }
 
-            Location spawnLocation = VariablesHandler.getPlayerSpawnLocations().get(player.getUniqueId());
+            Location spawnLocation = user.getSpawnLocation();
 
             int spawnX = spawnLocation.getBlockX();
             int spawnZ = spawnLocation.getBlockZ();
@@ -367,10 +369,10 @@ public class MainListener implements Listener {
 
             if (!instance.getConfigHandler().SETTINGS_RESTRICTIONS_ALLOW_MOVEMENT) {
                 if (playerX != spawnX || playerZ != spawnZ) {
-                    if (VariablesHandler.getSpawn("authenticationSpawn") == null) {
+                    if (Variables.getSpawn("authenticationSpawn") == null) {
                         player.teleport(new Location(playerLocation.getWorld(), (spawnX + 0.5), playerY, (spawnZ + 0.5)));
                     } else {
-                        Location location = VariablesHandler.getSpawn("authenticationSpawn");
+                        Location location = Variables.getSpawn("authenticationSpawn");
                         assert location != null;
                         location.setYaw(playerLocation.getYaw());
                         location.setPitch(playerLocation.getPitch());
@@ -383,115 +385,115 @@ public class MainListener implements Listener {
 
     @SuppressWarnings("deprecation")
     @EventHandler
-    public void disablePickupItem(PlayerPickupItemEvent e) {
-        Player player = e.getPlayer();
+    public void disablePickupItem(PlayerPickupItemEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disablePortal(PlayerPortalEvent e) {
-        Player player = e.getPlayer();
+    public void disablePortal(PlayerPortalEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableShearEntity(PlayerShearEntityEvent e) {
-        Player player = e.getPlayer();
+    public void disableShearEntity(PlayerShearEntityEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableToggleFlight(PlayerToggleFlightEvent e) {
-        Player player = e.getPlayer();
+    public void disableToggleFlight(PlayerToggleFlightEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableToggleSneak(PlayerToggleSneakEvent e) {
-        Player player = e.getPlayer();
+    public void disableToggleSneak(PlayerToggleSneakEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableToggleSprint(PlayerToggleSprintEvent e) {
-        Player player = e.getPlayer();
+    public void disableToggleSprint(PlayerToggleSprintEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableUnleashEntity(PlayerUnleashEntityEvent e) {
-        Player player = e.getPlayer();
+    public void disableUnleashEntity(PlayerUnleashEntityEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableVelocity(PlayerVelocityEvent e) {
-        Player player = e.getPlayer();
+    public void disableVelocity(PlayerVelocityEvent event) {
+        Player player = event.getPlayer();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableInventoryClick(InventoryClickEvent e) {
-        Player player = (Player) e.getWhoClicked();
+    public void disableInventoryClick(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableInventoryCreative(InventoryCreativeEvent e) {
-        Player player = (Player) e.getWhoClicked();
+    public void disableInventoryCreative(InventoryCreativeEvent event) {
+        Player player = (Player) event.getWhoClicked();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableInventoryDragEvent(InventoryDragEvent e) {
-        Player player = (Player) e.getWhoClicked();
+    public void disableInventoryDragEvent(InventoryDragEvent event) {
+        Player player = (Player) event.getWhoClicked();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableInventoryInteract(InventoryInteractEvent e) {
-        Player player = (Player) e.getWhoClicked();
+    public void disableInventoryInteract(InventoryInteractEvent event) {
+        Player player = (Player) event.getWhoClicked();
 
-        if (new User(player.getName()).hasToBeAuthenticated())
-            e.setCancelled(true);
+        if (Variables.getUser(player.getUniqueId()).hasToBeAuthenticated())
+            event.setCancelled(true);
     }
 
     @EventHandler
-    public void disableSessionKick(PlayerKickEvent e) {
+    public void disableSessionKick(PlayerKickEvent event) {
         if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_FORCE_SINGLE_SESSION)
-            if (e.getReason().equalsIgnoreCase("You logged in from another location"))
-                e.setCancelled(true);
+            if (event.getReason().equalsIgnoreCase("You logged in from another location"))
+                event.setCancelled(true);
 
     }
 
     @EventHandler
-    public void disableSessionKick1(AsyncPlayerPreLoginEvent e) {
-        String p = e.getName();
+    public void disableSessionKick1(AsyncPlayerPreLoginEvent event) {
+        String p = event.getName();
 
         if (instance.getConfigHandler().SETTINGS_RESTRICTIONS_FORCE_SINGLE_SESSION)
             if (instance.getServer().getPlayer(p) != null && instance.getServer().getPlayer(p).isOnline())
-                e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, instance.getMessagesHandler().COMMANDS_2FA_LOGIN_PLAYER_IS_ONLINE_KICK);
+                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, instance.getMessagesHandler().COMMANDS_2FA_LOGIN_PLAYER_IS_ONLINE_KICK);
     }
 }

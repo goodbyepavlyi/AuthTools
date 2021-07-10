@@ -6,5 +6,6 @@ public enum AuthenticationResult {
     TFA_ALREADY_LOGGED_IN,
     TFA_REGISTERED,
     TFA_ALREADY_REGISTERED,
-    INVALID_CODE
+    INVALID_CODE,
+    SESSION
 }

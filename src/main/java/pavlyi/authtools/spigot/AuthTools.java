@@ -2,43 +2,41 @@ package pavlyi.authtools.spigot;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import pavlyi.authtools.spigot.authentication.AuthHandler;
+import pavlyi.authtools.spigot.authentication.User;
+import pavlyi.authtools.spigot.commands.AuthCommand;
 import pavlyi.authtools.spigot.commands.AuthToolsCommand;
+import pavlyi.authtools.spigot.commands.RecoverCommand;
 import pavlyi.authtools.spigot.commands.TFACommand;
 import pavlyi.authtools.spigot.connections.MongoDB;
 import pavlyi.authtools.spigot.connections.MySQL;
 import pavlyi.authtools.spigot.connections.SQLite;
 import pavlyi.authtools.spigot.connections.YAMLConnection;
 import pavlyi.authtools.spigot.enums.ConnectionType;
-import pavlyi.authtools.spigot.enums.HookType;
 import pavlyi.authtools.spigot.enums.VersionType;
-import pavlyi.authtools.spigot.handlers.AuthHandler;
-import pavlyi.authtools.spigot.handlers.User;
-import pavlyi.authtools.spigot.handlers.VariablesHandler;
-import pavlyi.authtools.spigot.listeners.AuthMeListener;
 import pavlyi.authtools.spigot.listeners.MainListener;
 import pavlyi.authtools.spigot.listeners.SetupListener;
-import pavlyi.authtools.spigot.listeners.nLoginListener;
-import pavlyi.authtools.spigot.storages.ConfigHandler;
-import pavlyi.authtools.spigot.storages.MessagesHandler;
-import pavlyi.authtools.spigot.storages.SpawnHandler;
+import pavlyi.authtools.spigot.storages.Config;
+import pavlyi.authtools.spigot.storages.Messages;
+import pavlyi.authtools.spigot.storages.Spawn;
+import pavlyi.authtools.spigot.storages.Variables;
 
-import java.io.File;
+import java.io.*;
 
 public class AuthTools extends JavaPlugin {
     private static AuthTools instance;
     private PluginManager pluginManager;
 
     // Classes
-    private ConfigHandler configHandler;
-    private MessagesHandler messagesHandler;
+    private Config config;
+    private Messages messages;
+    private Spawn spawn;
     private MySQL mySQL;
     private SQLite sqlite;
     private MongoDB mongoDB;
     private YAMLConnection yamlConnection;
-    private SpawnHandler spawnHandler;
 
     private boolean printDisableMessage = false;
 
@@ -51,17 +49,17 @@ public class AuthTools extends JavaPlugin {
     }
 
     public void onEnable() {
+        // Initializing classes
         instance = this;
         pluginManager = getServer().getPluginManager();
 
-        // Initializing classes
-        configHandler = new ConfigHandler();
-        messagesHandler = new MessagesHandler();
+        config = new Config();
+        messages = new Messages();
+        spawn = new Spawn();
         mySQL = new MySQL();
         sqlite = new SQLite();
         mongoDB = new MongoDB();
         yamlConnection = new YAMLConnection();
-        spawnHandler = new SpawnHandler();
 
         // Printing the intro
         log("&f&m-------------------------");
@@ -70,6 +68,7 @@ public class AuthTools extends JavaPlugin {
         log("&r  &cWebsite: &fhttps://pavlyi.eu");
         log("");
 
+        // Checking if server version is supported
         if (!isValidVersion()) {
             log("&r  &cError: &fUnsupported version!");
             log("&r         &fThe plugin has been &cdisabled&f, because you are trying to run this plugin on unsupported version!");
@@ -77,13 +76,16 @@ public class AuthTools extends JavaPlugin {
             log("&f&m-------------------------");
 
             printDisableMessage = true;
-            getPluginManager().disablePlugin(this);
+            getServer().shutdown();
 
             return;
         }
 
+        // Creating plugin folders and files
         createPluginFolders();
         getConfigHandler().create();
+        getConfigHandler().migrate();
+        getConfigHandler().reload();
 
         String configCheck = getConfigHandler().check();
         if (configCheck != null) {
@@ -93,17 +95,17 @@ public class AuthTools extends JavaPlugin {
             log("&f&m-------------------------");
 
             printDisableMessage = true;
-            getPluginManager().disablePlugin(this);
+            getServer().shutdown();
 
             return;
         }
 
         getConfigHandler().load();
 
-        VariablesHandler.setConnectionType(ConnectionType.valueOf(getConfigHandler().CONNECTION_TYPE));
-        VariablesHandler.setHookType(HookType.valueOf(getConfigHandler().HOOK_TYPE));
 
         getMessagesHandler().create();
+        getMessagesHandler().migrate();
+        getMessagesHandler().reload();
 
         String messagesCheck = getMessagesHandler().check();
         if (messagesCheck != null) {
@@ -113,7 +115,7 @@ public class AuthTools extends JavaPlugin {
             log("&f&m-------------------------");
 
             printDisableMessage = true;
-            getPluginManager().disablePlugin(this);
+            getServer().shutdown();
 
             return;
         }
@@ -121,6 +123,9 @@ public class AuthTools extends JavaPlugin {
 
         getMessagesHandler().load();
         getSpawnHandler().create();
+        createEmailFile();
+
+        Variables.setConnectionType(ConnectionType.valueOf(getConfigHandler().CONNECTION_TYPE));
 
         Updater updater = new Updater(getDescription().getVersion());
         updater.checkForUpdate();
@@ -144,7 +149,7 @@ public class AuthTools extends JavaPlugin {
                 break;
         }
 
-        switch (VariablesHandler.getConnectionType()) {
+        switch (Variables.getConnectionType()) {
             case YAML:
                 getYamlConnection().connect(false);
                 break;
@@ -168,93 +173,37 @@ public class AuthTools extends JavaPlugin {
         getCommand("authtools").setExecutor(new AuthToolsCommand());
         getCommand("authtools").setTabCompleter(new AuthToolsCommand());
         getCommand("2fa").setExecutor(new TFACommand());
-        getCommand("2fa").setTabCompleter(new TFACommand());
+        getCommand("recover").setExecutor(new RecoverCommand());
+        getCommand("auth").setExecutor(new AuthCommand());
 
         for (Player player : getServer().getOnlinePlayers()) {
-            User user = new User(player.getName());
+            User user = Variables.getUser(player.getUniqueId());
 
             user.create();
             user.setIP(player.getAddress());
-            user.setUUID();
         }
 
-        if (!VariablesHandler.getHookType().equals(HookType.API)) {
-            try {
-                getPluginManager().registerEvents(new MainListener(), this);
-            } catch (Exception ex) {
-                log("&r  &cError: &fListener &cMainListener &fcouldn't get registered!");
-            }
-
-            try {
-                getPluginManager().registerEvents(new SetupListener(), this);
-            } catch (Exception ex) {
-                log("&r  &cError: &fListener &cSetupListener &fcouldn't get registered!");
-            }
+        try {
+            getPluginManager().registerEvents(new MainListener(), this);
+        } catch (Exception exception) {
+            log("&r  &cError: &fListener &cMainListener &fcouldn't get registered!");
+            exception.printStackTrace();
+            getServer().shutdown();
         }
 
-        switch (VariablesHandler.getHookType()) {
-            case STANDALONE:
-                for (Player player : getServer().getOnlinePlayers()) {
-                     AuthHandler authHandler = new AuthHandler(player);
-
-                    authHandler.requestAuthentication();
-                }
-
-                break;
-
-            case API:
-                log("&r  &aInfo: &fPlugin is listening only for actions requested by &cAPI&f!");
-
-                break;
-
-            case AUTHME:
-                if (hookPlugin("AuthMe")) {
-                    log("&r  &cError: &cAuthMe &fwasn't found!");
-                    log("&r         &fPlugin has been &cdisabled&f, because you defined to hook &cAuthMe &fin config,");
-                    log("&r         &fbut &cAuthMe &fwasn't found");
-                    log("&f&m-------------------------");
-
-                    printDisableMessage = true;
-
-                    getPluginManager().disablePlugin(this);
-
-                    break;
-                }
-
-                try {
-                    getPluginManager().registerEvents(new AuthMeListener(), this);
-                } catch (Exception ex) {
-                    log("&r  &cError: &fListener &cAuthMeListener &fcouldn't get registered!");
-                }
-
-                break;
-
-            case NLOGIN:
-                if (hookPlugin("nLogin")) {
-                    log("&r  &cError: &cnLogin &fwasn't found!");
-                    log("&r         &fPlugin has been &cdisabled&f, because you defined to hook &cnLogin &fin config,");
-                    log("&r         &fbut &cnLogin &fwasn't found");
-                    log("&f&m-------------------------");
-
-                    printDisableMessage = true;
-
-                    getPluginManager().disablePlugin(this);
-
-                    break;
-                }
-
-                try {
-                    getPluginManager().registerEvents(new nLoginListener(), this);
-                } catch (Exception ex) {
-                    log("&r  &cError: &fListener &cnLoginListener &fcouldn't get registered!");
-                }
-
-                break;
+        try {
+            getPluginManager().registerEvents(new SetupListener(), this);
+        } catch (Exception exception) {
+            log("&r  &cError: &fListener &cSetupListener &fcouldn't get registered!");
+            exception.printStackTrace();
+            getServer().shutdown();
         }
 
-        if (getPluginManager().isPluginEnabled(this)) {
+        for (Player player : getServer().getOnlinePlayers())
+            new AuthHandler(player).requestAuthentication();
+
+        if (getPluginManager().isPluginEnabled(this))
             log("&f&m-------------------------");
-        }
     }
 
     public void onDisable() {
@@ -294,26 +243,25 @@ public class AuthTools extends JavaPlugin {
 
 
         for (Player player : getServer().getOnlinePlayers()) {
-            User user = new User(player.getName());
+            User user = Variables.getUser(player.getUniqueId());
 
-            if (user.getSettingUp2FA()) {
+            if (user.isSettingUp2FA()) {
                 user.setSettingUp2FA(false);
                 user.set2FA(false);
                 user.set2FAsecret(null);
                 user.setRecoveryCode(true);
 
-                if (!VariablesHandler.getVersion().equals(VersionType.ONE_NINE))
-                    if (VariablesHandler.getPlayerInventories().containsKey(player.getUniqueId())) {
-                        player.getInventory().clear();
-                        player.getInventory().setContents(VariablesHandler.getPlayerInventories().get(player.getUniqueId()).getContents());
+                if (!Variables.getVersion().equals(VersionType.ONE_NINE) && user.getPlayerInventory() != null) {
+                    player.getInventory().clear();
+                    player.getInventory().setContents(user.getPlayerInventory().getContents());
 
-                        VariablesHandler.getPlayerInventories().remove(player.getUniqueId());
-                    }
+                    user.setPlayerInventory(null);
+                }
             }
         }
 
-        if (VariablesHandler.getConnectionType() != null)
-            switch (VariablesHandler.getConnectionType()) {
+        if (Variables.getConnectionType() != null)
+            switch (Variables.getConnectionType()) {
                 case MYSQL:
                     getMySQL().disconnect(printDisable);
                     break;
@@ -354,16 +302,50 @@ public class AuthTools extends JavaPlugin {
         log("");
 
         createPluginFolders();
+        getConfigHandler().create();
+        getConfigHandler().migrate();
+        getConfigHandler().reload();
 
-        if (getConfigHandler().check() != null) {
-            log("do checkconfiuration");
+        String configCheck = getConfigHandler().check();
+        if (configCheck != null) {
+            log("&r  &cError: &fInvalid config!");
+            log("&r         &fThe plugin has been &cdisabled&f, because there is missing content in the config,");
+            log("&r         &fmissing line \"&c" + configCheck + "&f\"");
+            log("&f&m-------------------------");
+
+            printDisableMessage = true;
+            getServer().shutdown();
+
             return;
         }
 
-        VariablesHandler.setConnectionType(ConnectionType.valueOf(getConfigHandler().CONNECTION_TYPE));
-        VariablesHandler.setHookType(HookType.valueOf(getConfigHandler().HOOK_TYPE));
+        getConfigHandler().load();
 
-        switch (VariablesHandler.getConnectionType()) {
+        Variables.setConnectionType(ConnectionType.valueOf(getConfigHandler().CONNECTION_TYPE));
+
+        getMessagesHandler().create();
+        getMessagesHandler().migrate();
+        getMessagesHandler().reload();
+
+        String messagesCheck = getMessagesHandler().check();
+        if (messagesCheck != null) {
+            log("&r  &cError: &fInvalid config!");
+            log("&r         &fThe plugin has been &cdisabled&f, because there is missing content in the messages,");
+            log("&r         &fmissing line \"&c" + messagesCheck + "&f\"");
+            log("&f&m-------------------------");
+
+            printDisableMessage = true;
+            getServer().shutdown();
+
+            return;
+        }
+
+
+        getMessagesHandler().load();
+        getSpawnHandler().create();
+        createEmailFile();
+
+        switch (Variables.getConnectionType()) {
             case YAML:
                 getYamlConnection().connect(false);
                 break;
@@ -384,90 +366,15 @@ public class AuthTools extends JavaPlugin {
         if (getConfigHandler().HOOK_BUNGEECORD)
             getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
-        getCommand("authtools").setExecutor(new AuthToolsCommand());
-        getCommand("authtools").setTabCompleter(new AuthToolsCommand());
-        getCommand("2fa").setExecutor(new TFACommand());
-        getCommand("2fa").setTabCompleter(new TFACommand());
-
         for (Player player : getServer().getOnlinePlayers()) {
-            User user = new User(player.getName());
+            User user = Variables.getUser(player.getUniqueId());
 
             user.create();
             user.setIP(player.getAddress());
-            user.setUUID();
         }
 
-        HandlerList.unregisterAll(this);
-
-        try {
-            getPluginManager().registerEvents(new MainListener(), this);
-        } catch (Exception ex) {
-            log("&r  &cError: &fListener &cMainListener &fcouldn't get registered!");
-        }
-
-        try {
-            getPluginManager().registerEvents(new SetupListener(), this);
-        } catch (Exception ex) {
-            log("&r  &cError: &fListener &cSetupListener &fcouldn't get registered!");
-        }
-
-        switch (VariablesHandler.getHookType()) {
-            case API:
-                log("&r  &aInfo: &fPlugin is listening only for actions requested by &cAPI&f!");
-
-                break;
-
-            case AUTHME:
-                if (hookPlugin("AuthMe")) {
-                    log("&r  &cError: &cAuthMe &fwasn't found!");
-                    log("&r         &fPlugin has been &cdisabled&f, because you defined to hook &cAuthMe &fin config,");
-                    log("&r         &fbut &cAuthMe &fwasn't found");
-                    log("&f&m-------------------------");
-
-                    printDisableMessage = true;
-
-                    getPluginManager().disablePlugin(this);
-
-                    break;
-                }
-
-
-                try {
-                    getPluginManager().registerEvents(new AuthMeListener(), this);
-                } catch (Exception ex) {
-                    log("&r  &cError: &fListener &cAuthMeListener &fcouldn't get registered!");
-                }
-
-                break;
-
-            case NLOGIN:
-                if (hookPlugin("nLogin")) {
-                    log("&r  &cError: &cnLogin &fwasn't found!");
-                    log("&r         &fPlugin has been &cdisabled&f, because you defined to hook &cnLogin &fin config,");
-                    log("&r         &fbut &cnLogin &fwasn't found");
-                    log("&f&m-------------------------");
-
-                    printDisableMessage = true;
-
-                    getPluginManager().disablePlugin(this);
-
-                    break;
-                }
-
-                try {
-                    getPluginManager().registerEvents(new nLoginListener(), this);
-                } catch (Exception ex) {
-                    log("&r  &cError: &fListener &cnLoginListener &fcouldn't get registered!");
-                }
-
-                break;
-        }
-
-        log("&f&m-------------------------");
-    }
-
-    public boolean hookPlugin(String pluginName) {
-        return getPluginManager().getPlugin(pluginName) == null;
+        if (getPluginManager().isPluginEnabled(this))
+            log("&f&m-------------------------");
     }
 
     public boolean isValidVersion() {
@@ -490,34 +397,61 @@ public class AuthTools extends JavaPlugin {
         new File(instance.getDataFolder() + "/tempFiles/").mkdirs();
     }
 
-    public void switchConnection(ConnectionType switchToConnection) {
-        if (switchToConnection == null)
-            return;
+    public void createEmailFile() {
+        if (!new File(instance.getDataFolder() + File.separator + "recovery_code_email.html").exists()) {
+            try {
+                InputStream inputStream = instance.getResource("spigot/recovery_code_email.html");
+                OutputStream outStream = new FileOutputStream(instance.getDataFolder() + File.separator + "recovery_code_email.html");
+                byte[] buffer = new byte[inputStream.available()];
 
-        if (VariablesHandler.getConnectionType() == null)
+                inputStream.read(buffer);
+                outStream.write(buffer);
+            } catch (IOException exception) {
+                instance.log("&r  &cError: &fWhile creating &cEmail for Recovery Code &fan error ocurred!");
+                exception.printStackTrace();
+            }
+        }
+
+        if (!new File(instance.getDataFolder() + File.separator + "verification_code_email.html").exists()) {
+            try {
+                InputStream inputStream = instance.getResource("spigot/verification_code_email.html");
+                OutputStream outStream = new FileOutputStream(instance.getDataFolder() + File.separator + "verification_code_email.html");
+                byte[] buffer = new byte[inputStream.available()];
+
+                inputStream.read(buffer);
+                outStream.write(buffer);
+            } catch (IOException exception) {
+                instance.log("&r  &cError: &fWhile creating &cEmail for Verification Code &fan error ocurred!");
+                exception.printStackTrace();
+            }
+        }
+    }
+
+    public void switchConnection(ConnectionType switchToConnection) {
+        if (switchToConnection == null || Variables.getConnectionType() == null)
             return;
 
         switch (switchToConnection) {
             case YAML:
-                switch (VariablesHandler.getConnectionType()) {
+                switch (Variables.getConnectionType()) {
                     case MYSQL:
                         getMySQL().disconnect(true);
                         getYamlConnection().connect(true);
-                        VariablesHandler.setConnectionType(ConnectionType.YAML);
+                        Variables.setConnectionType(ConnectionType.YAML);
 
                         break;
 
                     case SQLITE:
                         getSQLite().disconnect(true);
                         getYamlConnection().connect(true);
-                        VariablesHandler.setConnectionType(ConnectionType.YAML);
+                        Variables.setConnectionType(ConnectionType.YAML);
 
                         break;
 
                     case MONGODB:
                         getMongoDB().disconnect(true);
                         getYamlConnection().connect(true);
-                        VariablesHandler.setConnectionType(ConnectionType.YAML);
+                        Variables.setConnectionType(ConnectionType.YAML);
 
                         break;
                 }
@@ -525,24 +459,24 @@ public class AuthTools extends JavaPlugin {
                 break;
 
             case MYSQL:
-                switch (VariablesHandler.getConnectionType()) {
+                switch (Variables.getConnectionType()) {
                     case YAML:
                         getMySQL().connect(true);
-                        VariablesHandler.setConnectionType(ConnectionType.MYSQL);
+                        Variables.setConnectionType(ConnectionType.MYSQL);
 
                         break;
 
                     case SQLITE:
                         getSQLite().disconnect(true);
                         getMySQL().connect(true);
-                        VariablesHandler.setConnectionType(ConnectionType.MYSQL);
+                        Variables.setConnectionType(ConnectionType.MYSQL);
 
                         break;
 
                     case MONGODB:
                         getMongoDB().disconnect(true);
                         getMySQL().connect(true);
-                        VariablesHandler.setConnectionType(ConnectionType.MYSQL);
+                        Variables.setConnectionType(ConnectionType.MYSQL);
 
                         break;
                 }
@@ -550,24 +484,24 @@ public class AuthTools extends JavaPlugin {
                 break;
 
             case SQLITE:
-                switch (VariablesHandler.getConnectionType()) {
+                switch (Variables.getConnectionType()) {
                     case YAML:
                         getSQLite().connect(true);
-                        VariablesHandler.setConnectionType(ConnectionType.SQLITE);
+                        Variables.setConnectionType(ConnectionType.SQLITE);
 
                         break;
 
                     case MYSQL:
                         getMySQL().disconnect(true);
                         getSQLite().connect(true);
-                        VariablesHandler.setConnectionType(ConnectionType.SQLITE);
+                        Variables.setConnectionType(ConnectionType.SQLITE);
 
                         break;
 
                     case MONGODB:
                         getMongoDB().disconnect(true);
                         getSQLite().connect(true);
-                        VariablesHandler.setConnectionType(ConnectionType.SQLITE);
+                        Variables.setConnectionType(ConnectionType.SQLITE);
 
                         break;
                 }
@@ -575,24 +509,24 @@ public class AuthTools extends JavaPlugin {
                 break;
 
             case MONGODB:
-                switch (VariablesHandler.getConnectionType()) {
+                switch (Variables.getConnectionType()) {
                     case YAML:
                         getMongoDB().connect(true);
-                        VariablesHandler.setConnectionType(ConnectionType.MONGODB);
+                        Variables.setConnectionType(ConnectionType.MONGODB);
 
                         break;
 
                     case MYSQL:
                         getMySQL().disconnect(true);
                         getMongoDB().connect(true);
-                        VariablesHandler.setConnectionType(ConnectionType.MONGODB);
+                        Variables.setConnectionType(ConnectionType.MONGODB);
 
                         break;
 
                     case SQLITE:
                         getSQLite().disconnect(true);
                         getMongoDB().connect(true);
-                        VariablesHandler.setConnectionType(ConnectionType.MONGODB);
+                        Variables.setConnectionType(ConnectionType.MONGODB);
 
                         break;
                 }
@@ -606,12 +540,12 @@ public class AuthTools extends JavaPlugin {
         return pluginManager;
     }
 
-    public ConfigHandler getConfigHandler() {
-        return configHandler;
+    public Config getConfigHandler() {
+        return config;
     }
 
-    public MessagesHandler getMessagesHandler() {
-        return messagesHandler;
+    public Messages getMessagesHandler() {
+        return messages;
     }
 
     public MySQL getMySQL() {
@@ -630,7 +564,7 @@ public class AuthTools extends JavaPlugin {
         return yamlConnection;
     }
 
-    public SpawnHandler getSpawnHandler() {
-        return spawnHandler;
+    public Spawn getSpawnHandler() {
+        return spawn;
     }
 }

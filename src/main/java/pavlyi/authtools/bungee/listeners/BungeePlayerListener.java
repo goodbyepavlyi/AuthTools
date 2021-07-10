@@ -13,7 +13,7 @@ import net.md_5.bungee.event.EventPriority;
 import pavlyi.authtools.bungee.AuthToolsBungee;
 
 public class BungeePlayerListener implements Listener {
-    private AuthToolsBungee instance = AuthToolsBungee.getInstance();
+    private final AuthToolsBungee instance = AuthToolsBungee.getInstance();
 
     private boolean isAuthServer(ServerInfo serverInfo) {
         return instance.getConfigHandler().AUTH_SERVERS.contains(serverInfo.getName());

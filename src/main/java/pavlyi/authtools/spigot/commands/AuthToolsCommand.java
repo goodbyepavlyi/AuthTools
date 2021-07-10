@@ -7,12 +7,12 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import pavlyi.authtools.spigot.AuthTools;
 import pavlyi.authtools.spigot.Updater;
-import pavlyi.authtools.spigot.enums.InformationType;
+import pavlyi.authtools.spigot.authentication.User;
 import pavlyi.authtools.spigot.enums.ConnectionType;
+import pavlyi.authtools.spigot.enums.InformationType;
 import pavlyi.authtools.spigot.events.AsyncResetEvent;
-import pavlyi.authtools.spigot.handlers.User;
-import pavlyi.authtools.spigot.handlers.VariablesHandler;
 import pavlyi.authtools.spigot.storages.ImportHandler;
+import pavlyi.authtools.spigot.storages.Variables;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +45,7 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
 
                         for (String tempMessage : instance.getMessagesHandler().COMMANDS_AUTHTOOLS_ABOUT) {
                             tempMessage = tempMessage.replace("%version%", instance.getDescription().getVersion());
-                            tempMessage = tempMessage.replace("%connection%", VariablesHandler.getConnectionType().toString());
+                            tempMessage = tempMessage.replace("%connection%", Variables.getConnectionType().toString());
 
                             if (updateNeeded) {
                                 tempMessage = tempMessage.replace("%is_update_needed%", "(Update needed!)");
@@ -74,10 +74,6 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
                         break;
 
                     case "setspawn":
-                        sender.sendMessage(instance.getMessagesHandler().ONLY_PLAYER_CAN_EXECUTE_COMMAND);
-
-                        break;
-
                     case "setlobby":
                         sender.sendMessage(instance.getMessagesHandler().ONLY_PLAYER_CAN_EXECUTE_COMMAND);
 
@@ -122,7 +118,7 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
                         }
 
                         ConnectionType enteredConnectionType = ConnectionType.valueOf(args[1].toUpperCase());
-                        ConnectionType connectionType = VariablesHandler.getConnectionType();
+                        ConnectionType connectionType = Variables.getConnectionType();
 
                         switch (enteredConnectionType) {
                             case YAML:
@@ -222,19 +218,18 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
                         break;
 
                     case "info":
-                        User user = new User(args[1]);
+                        if (instance.getServer().getPlayer(args[1]) == null) {
+                            sender.sendMessage(instance.getMessagesHandler().PLAYER_NOT_FOUND.replace("%player%", args[1]));
+                            return false;
+                        }
 
-                        if (user.isInDatabase()) {
+                        User user = Variables.getUser(instance.getServer().getPlayer(args[1]).getUniqueId());
+
+                        if (user.exists()) {
                             ArrayList<String> messages = new ArrayList<>();
 
                             for (String tempMessage : instance.getMessagesHandler().COMMANDS_AUTHTOOLS_INFO) {
                                 tempMessage = tempMessage.replace("%player%", args[1]);
-
-                                if (user.getUUID() != null) {
-                                    tempMessage = tempMessage.replace("%uuid%", user.getUUID());
-                                } else {
-                                    tempMessage = tempMessage.replace("%uuid%", "Unknown");
-                                }
 
                                 if (user.getIP() != null) {
                                     tempMessage = tempMessage.replace("%ip%", user.getIP());
@@ -248,7 +243,7 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
                                     tempMessage = tempMessage.replace("%email%", "Unknown");
                                 }
 
-                                if (user.getSettingUp2FA()) {
+                                if (user.isSettingUp2FA()) {
                                     tempMessage = tempMessage.replace("%2fa%", instance.color("&eSetting up"));
                                 } else {
                                     if (user.get2FA()) {
@@ -305,7 +300,7 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
                         ImportHandler importHandler = new ImportHandler(ConnectionType.valueOf(type));
 
                         if (importHandler.importYAML() || importHandler.importMySQL() || importHandler.importMongoDB() || importHandler.importSQLite()) {
-                            sender.sendMessage(instance.getMessagesHandler().COMMANDS_AUTHTOOLS_IMPORT_SUCESSFULLY_IMPORTED.replace("%importedType%", type).replace("%currentBackend%", VariablesHandler.getConnectionType().toString()));
+                            sender.sendMessage(instance.getMessagesHandler().COMMANDS_AUTHTOOLS_IMPORT_SUCESSFULLY_IMPORTED.replace("%importedType%", type).replace("%currentBackend%", Variables.getConnectionType().toString()));
                         } else {
                             sender.sendMessage(instance.getMessagesHandler().COMMANDS_AUTHTOOLS_IMPORT_ERROR_WHILE_IMPORTING);
                         }
@@ -332,19 +327,25 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
                         break;
 
                     case "reset":
-                        if (!(InformationType.isValid(args[2]) || args[2].equalsIgnoreCase("2fa"))) {
+                        InformationType resetType;
+
+                        try {
+                            if (args[2].equalsIgnoreCase("2fa"))
+                                resetType = InformationType.TFA;
+                            else
+                                resetType = InformationType.valueOf(args[2].toUpperCase());
+                        } catch (IllegalArgumentException exception) {
                             sender.sendMessage(instance.getMessagesHandler().COMMANDS_AUTHTOOLS_RESETUSAGE);
                             break;
                         }
 
-                        InformationType resetType;
 
-                        if (args[2].equalsIgnoreCase("2fa"))
-                            resetType = InformationType.TFA;
-                        else
-                            resetType = InformationType.valueOf(args[2].toUpperCase());
+                        if (instance.getServer().getPlayer(args[1]) == null) {
+                            sender.sendMessage(instance.getMessagesHandler().PLAYER_NOT_FOUND.replace("%player%", args[1]));
+                            return false;
+                        }
 
-                        User user = new User(args[1]);
+                        User user = Variables.getUser(instance.getServer().getPlayer(args[1]).getUniqueId());
 
                         instance.getPluginManager().callEvent(new AsyncResetEvent(instance.getServer().getPlayer(args[1]), resetType));
 
@@ -367,7 +368,18 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
                                 break;
 
                             case MAIL:
-                                sender.sendMessage(instance.color("&f[&cAuthTools&f] &cEmail &fis in progress! Keep watching for an &cupdate&f!"));
+                                if (user.getEmail() != null) {
+                                    user.setEmail(null);
+
+                                    sender.sendMessage(
+                                            instance.getMessagesHandler().COMMANDS_AUTHTOOLS_RESET_DISABLED_EMAIL.replace("%player%", args[1]));
+
+                                    break;
+                                }
+
+                                sender.sendMessage(instance
+                                        .getMessagesHandler().COMMANDS_AUTHTOOLS_RESET_PLAYER_DOESNT_HAVE_EMAIL_ENABLED
+                                        .replace("%player%", args[1]));
 
                                 break;
                         }
@@ -494,7 +506,7 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
 
                         for (String tempMessage : instance.getMessagesHandler().COMMANDS_AUTHTOOLS_ABOUT) {
                             tempMessage = tempMessage.replace("%version%", instance.getDescription().getVersion());
-                            tempMessage = tempMessage.replace("%connection%", VariablesHandler.getConnectionType().toString());
+                            tempMessage = tempMessage.replace("%connection%", Variables.getConnectionType().toString());
 
                             if (updateNeeded) {
                                 tempMessage = tempMessage.replace("%is_update_needed%", "(Update needed!)");
@@ -540,7 +552,7 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
 
                 case "setspawn":
                     if (player.hasPermission("authtools.use.setspawn")) {
-                        VariablesHandler.createSpawn("authenticationSpawn", player.getLocation());
+                        Variables.createSpawn("authenticationSpawn", player.getLocation());
                         player.sendMessage(instance.getMessagesHandler().COMMANDS_AUTHTOOLS_SETSPAWN);
                         break;
                     }
@@ -550,7 +562,7 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
 
                 case "setlobby":
                     if (player.hasPermission("authtools.use.setlobby")) {
-                        VariablesHandler.createSpawn("lobby", player.getLocation());
+                        Variables.createSpawn("lobby", player.getLocation());
                         player.sendMessage(instance.getMessagesHandler().COMMANDS_AUTHTOOLS_SETLOBBY);
                         break;
                     }
@@ -614,7 +626,7 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
                         }
 
                         ConnectionType enteredConnectionType = ConnectionType.valueOf(args[1].toUpperCase());
-                        ConnectionType connectionType = VariablesHandler.getConnectionType();
+                        ConnectionType connectionType = Variables.getConnectionType();
 
                         switch (enteredConnectionType) {
                             case YAML:
@@ -719,42 +731,40 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
 
                 case "info":
                     if (player.hasPermission("authtools.use.info")) {
-                        User user = new User(args[1]);
+                        if (instance.getServer().getPlayer(args[1]) == null) {
+                            sender.sendMessage(instance.getMessagesHandler().PLAYER_NOT_FOUND.replace("%player%", args[1]));
+                            return false;
+                        }
 
-                        if (user.isInDatabase()) {
-                            ArrayList<String> messages = new ArrayList<String>();
+                        User user = Variables.getUser(instance.getServer().getPlayer(args[1]).getUniqueId());
+                        if (user.exists()) {
+                            ArrayList<String> messages = new ArrayList<>();
 
                             for (String tempMessage : instance.getMessagesHandler().COMMANDS_AUTHTOOLS_INFO) {
                                 tempMessage = tempMessage.replace("%player%", args[1]);
 
-                                if (user.getUUID() != null) {
-                                    tempMessage = tempMessage.replace("%uuid%", user.getUUID());
-                                } else {
+                                if (instance.getServer().getPlayer(args[1]) != null)
+                                    tempMessage = tempMessage.replace("%uuid%", instance.getServer().getPlayer(args[1]).getUniqueId().toString());
+                                else
                                     tempMessage = tempMessage.replace("%uuid%", "Unknown");
-                                }
 
-                                if (user.getIP() != null) {
+                                if (user.getIP() != null)
                                     tempMessage = tempMessage.replace("%ip%", user.getIP());
-                                } else {
+                                else
                                     tempMessage = tempMessage.replace("%ip%", "Unknown");
-                                }
 
-                                if (user.getEmail() != null) {
+                                if (user.getEmail() != null)
                                     tempMessage = tempMessage.replace("%email%", user.getEmail());
-                                } else {
+                                else
                                     tempMessage = tempMessage.replace("%email%", "Unknown");
-                                }
 
-                                if (user.getSettingUp2FA()) {
+                                if (user.isSettingUp2FA())
                                     tempMessage = tempMessage.replace("%2fa%",
                                             instance.color("&eSetting up"));
-                                } else {
-                                    if (user.get2FA()) {
-                                        tempMessage = tempMessage.replace("%2fa%", instance.color("&a✔"));
-                                    } else {
-                                        tempMessage = tempMessage.replace("%2fa%", instance.color("&c✖"));
-                                    }
-                                }
+                                else if (user.get2FA())
+                                    tempMessage = tempMessage.replace("%2fa%", instance.color("&a✔"));
+                                else
+                                    tempMessage = tempMessage.replace("%2fa%", instance.color("&c✖"));
 
                                 if (user.get2FAsecret() != null) {
                                     tempMessage = tempMessage.replace("%2fa_secret%", user.get2FAsecret());
@@ -814,7 +824,7 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
                             ImportHandler importHandler = new ImportHandler(ConnectionType.valueOf(type));
 
                             if (importHandler.importYAML() || importHandler.importMySQL() || importHandler.importMongoDB() || importHandler.importSQLite()) {
-                                player.sendMessage(instance.getMessagesHandler().COMMANDS_AUTHTOOLS_IMPORT_SUCESSFULLY_IMPORTED.replace("%importedType%", type).replace("%currentBackend%", VariablesHandler.getConnectionType().toString()));
+                                player.sendMessage(instance.getMessagesHandler().COMMANDS_AUTHTOOLS_IMPORT_SUCESSFULLY_IMPORTED.replace("%importedType%", type).replace("%currentBackend%", Variables.getConnectionType().toString()));
                             } else {
                                 player.sendMessage(instance.getMessagesHandler().COMMANDS_AUTHTOOLS_IMPORT_ERROR_WHILE_IMPORTING);
                             }
@@ -855,18 +865,24 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
 
                 case "reset":
                     if (player.hasPermission("authtools.use.reset")) {
-                        InformationType resetType = InformationType.valueOf(args[2]);
+                        InformationType resetType;
 
-                        if (args[2].equalsIgnoreCase("2fa")) {
-                            resetType = InformationType.TFA;
-                        }
-
-                        if (!(resetType.equals(InformationType.TFA) || resetType.equals(InformationType.MAIL))) {
+                        try {
+                            if (args[2].equalsIgnoreCase("2fa"))
+                                resetType = InformationType.TFA;
+                            else
+                                resetType = InformationType.valueOf(args[2].toUpperCase());
+                        } catch (IllegalArgumentException exception) {
                             player.sendMessage(instance.getMessagesHandler().COMMANDS_AUTHTOOLS_RESETUSAGE);
-                            break;
+                            return false;
                         }
 
-                        User user = new User(args[1]);
+                        if (instance.getServer().getPlayer(args[1]) == null) {
+                            sender.sendMessage(instance.getMessagesHandler().PLAYER_NOT_FOUND.replace("%player%", args[1]));
+                            return false;
+                        }
+
+                        User user = Variables.getUser(instance.getServer().getPlayer(args[1]).getUniqueId());
 
                         instance.getPluginManager().callEvent(new AsyncResetEvent(instance.getServer().getPlayer(args[1]), resetType));
 
@@ -887,12 +903,22 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
                                 break;
 
                             case MAIL:
-                                player.sendMessage(instance.color("&f[&cAuthTools&f] &cEmail &fis in progress! Keep watching for an &cupdate&f!"));
+                                if (user.getEmail() != null) {
+                                    user.setEmail(null);
+
+                                    player.sendMessage(
+                                            instance.getMessagesHandler().COMMANDS_AUTHTOOLS_RESET_DISABLED_EMAIL.replace("%player%", args[1]));
+
+                                    break;
+                                }
+
+                                player.sendMessage(instance
+                                        .getMessagesHandler().COMMANDS_AUTHTOOLS_RESET_PLAYER_DOESNT_HAVE_EMAIL_ENABLED
+                                        .replace("%player%", args[1]));
 
                                 break;
                         }
 
-                        player.sendMessage(instance.getMessagesHandler().COMMANDS_AUTHTOOLS_RESETUSAGE);
                         break;
                     }
 
@@ -1035,7 +1061,7 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
         if (cmd.getName().equalsIgnoreCase("authtools")) {
             if (args.length == 1) {
                 List<String> mainCommands = Arrays.asList("reset", "backend", "info", "setspawn", "setlobby", "import", "about", "reload");
-                List<String> possibleCommands = new ArrayList<String>();
+                List<String> possibleCommands = new ArrayList<>();
 
                 if (!args[0].equals("")) {
                     for (String command : mainCommands) {
@@ -1126,7 +1152,7 @@ public class AuthToolsCommand implements CommandExecutor, TabCompleter {
 
             if (args.length >= 3) {
                 List<String> mainCommands = Arrays.asList("2fa", "mail");
-                List<String> possibleCommands = new ArrayList<String>();
+                List<String> possibleCommands = new ArrayList<>();
 
                 if (!args[0].equals("")) {
                     if (args[0].equalsIgnoreCase("reset")) {

@@ -18,7 +18,7 @@ public class MySQL {
                 String hostname = instance.getConfigHandler().CONNECTION_MYSQL_HOSTNAME;
                 int port = instance.getConfigHandler().CONNECTION_MYSQL_PORT;
                 String database = instance.getConfigHandler().CONNECTION_MYSQL_DATABASE;
-                String options = "?autoReconnect=true";
+                String options = instance.getConfigHandler().CONNECTION_MYSQL_OPTIONS;
                 String username = instance.getConfigHandler().CONNECTION_MYSQL_USERNAME;
                 String password = instance.getConfigHandler().CONNECTION_MYSQL_PASSWORD;
 
@@ -41,12 +41,6 @@ public class MySQL {
                                 }
                             } catch (SQLException ex) {
                                 try {
-                                    String hostname = instance.getConfigHandler().CONNECTION_MYSQL_HOSTNAME;
-                                    int port = instance.getConfigHandler().CONNECTION_MYSQL_PORT;
-                                    String database = instance.getConfigHandler().CONNECTION_MYSQL_DATABASE;
-                                    String options = "?autoReconnect=true";
-                                    String username = instance.getConfigHandler().CONNECTION_MYSQL_USERNAME;
-                                    String password = instance.getConfigHandler().CONNECTION_MYSQL_PASSWORD;
 
                                     String connectionString = "jdbc:mysql://" + hostname + ":" + port + "/" + database + options + "?user=" + username + "&password=" + password;
 
@@ -62,7 +56,7 @@ public class MySQL {
                                 }
                             }
                         }
-                    }.runTaskTimerAsynchronously(instance, 60 * 20, 60 * 20);
+                    }.runTaskTimerAsynchronously(instance, 0, 60 * 20);
                 }
 
                 return true;
@@ -80,7 +74,8 @@ public class MySQL {
     public void createTable(boolean silent) {
         if (isConnected()) {
             try {
-                getConnection().createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS authtools(name VARCHAR(64), uuid VARCHAR(64), ip VARCHAR(64), email VARCHAR(64), 2fa boolean, 2faSecret VARCHAR(64), 2faRecoveryCode int, 2faSettingUp boolean);");
+                getConnection().createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS authtools(name VARCHAR(255), uuid VARCHAR(255), password VARCHAR (255), ip VARCHAR(255), email VARCHAR(255), 2fa boolean, 2faSecret VARCHAR(255), 2faRecoveryCode int);");
+                getConnection().createStatement().executeUpdate("ALTER TABLE authtools ADD password VARCHAR (255) NOT NULL;");
 
                 if (!silent)
                     instance.log("&r  &aSuccess: &fCreated tables for &cMySQL&f!");

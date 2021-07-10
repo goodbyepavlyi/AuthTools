@@ -3,7 +3,8 @@ package pavlyi.authtools.spigot.events;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import pavlyi.authtools.spigot.handlers.User;
+import pavlyi.authtools.spigot.authentication.User;
+import pavlyi.authtools.spigot.storages.Variables;
 
 public class AsyncLoginEvent extends Event {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
@@ -14,7 +15,7 @@ public class AsyncLoginEvent extends Event {
 
     public AsyncLoginEvent(Player player, int code) {
         this.player = player;
-        this.user = new User(player.getName());
+        this.user = Variables.getUser(player.getUniqueId());
         this.code = code;
     }
 

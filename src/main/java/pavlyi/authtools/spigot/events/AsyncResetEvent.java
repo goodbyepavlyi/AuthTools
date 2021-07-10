@@ -3,19 +3,20 @@ package pavlyi.authtools.spigot.events;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import pavlyi.authtools.spigot.authentication.User;
 import pavlyi.authtools.spigot.enums.InformationType;
-import pavlyi.authtools.spigot.handlers.User;
+import pavlyi.authtools.spigot.storages.Variables;
 
 public class AsyncResetEvent extends Event {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
 
-    private Player player;
-    private User user;
-    private InformationType informationType;
+    private final Player player;
+    private final User user;
+    private final InformationType informationType;
 
     public AsyncResetEvent(Player player, InformationType informationType) {
         this.player = player;
-        this.user = new User(player.getName());
+        this.user = Variables.getUser(player.getUniqueId());
         this.informationType = informationType;
     }
 

@@ -7,124 +7,183 @@
 #                                 #
 ###################################
 
-noPermissions: "&f[&cAuthTools&f] &fNo permissions!"
-pluginReloaded: "&f[&cAuthTools&f] &cAuthTools &fconfiguration was reloaded!"
-playerNotFound: "&f[&cAuthTools&f] &c%player% &fwas not found!"
-onlyPlayerCanExecuteCommand: "&f[&cAuthTools&f] &fOnly player can execute this command!"
+noPermissions: '&f[&cAuthTools&f] No permissions!'
+pluginReloaded: '&f[&cAuthTools&f] &cAuthTools &fconfiguration was reloaded!'
+playerNotFound: '&f[&cAuthTools&f] &c%player% &fwas not found!'
+onlyPlayerCanExecuteCommand: '&f[&cAuthTools&f] Only player can execute this command!'
 
 commands:
-    authtools:
-        helpusage:
-        - ""
-        - " &f&m-------------------------------"
-        - "            &cAuthTools"
-        - ""
-        - " &f- &c/authtools &f| &cShows help"
-        - " &f- &c/authtools reset <player> [2fa/mail] &f| &cResets user's 2FA/Mail"
-        - " &f- &c/authtools backend <type> &f| &cChanges connection type"
-        - " &f- &c/authtools info <player> &f| &cShows a realtime info about user"
-        - " &f- &c/authtools setspawn &f| &cSets a spawn location"
-        - " &f- &c/authtools setlobby &f| &cSets a lobby location"
-        - " &f- &c/authtools import <backend> &f| &cImports data from a backend to another backend"
-        - " &f- &c/authtools about &f| &cShows a info about plugin"
-        - " &f- &c/authtools reload &f| &cReloads a plugin"
-        - ""
-        - "        &fPlugin by: &cPavlyi"
-        - ""
-        - " &f&m-------------------------------"
-        - ""
+  authtools:
+    helpusage:
+      - ""
+      - " &f&m-------------------------------"
+      - "            &cAuthTools"
+      - ""
+      - " &f- &c/authtools &f| &cShows help"
+      - " &f- &c/authtools reset <player> [2fa/mail] &f| &cResets user's 2FA/Mail"
+      - " &f- &c/authtools backend <type> &f| &cChanges connection type"
+      - " &f- &c/authtools info <player> &f| &cShows a realtime info about user"
+      - " &f- &c/authtools setspawn &f| &cSets a spawn location"
+      - " &f- &c/authtools setlobby &f| &cSets a lobby location"
+      - " &f- &c/authtools import <backend> &f| &cImports data from a backend to another backend"
+      - " &f- &c/authtools about &f| &cShows a info about plugin"
+      - " &f- &c/authtools reload &f| &cReloads a plugin"
+      - ""
+      - "        &fPlugin by: &cPavlyi"
+      - ""
+      - " &f&m-------------------------------"
+      - ""
 
-        about:
-        - ""
-        - " &f&m-------------------------------"
-        - "            &cAuthTools"
-        - ""
-        - " &f- &cVersion: &f%version% &c%is_update_needed%"
-        - " &f- &cConnection: &f%connection%"
-        - ""
-        - "        &fPlugin by: &cPavlyi"
-        - ""
-        - " &f&m-------------------------------"
-        - ""
+    about:
+      - ""
+      - " &f&m-------------------------------"
+      - "            &cAuthTools"
+      - ""
+      - " &f- &cVersion: &f%version% &c%is_update_needed%"
+      - " &f- &cConnection: &f%connection%"
+      - ""
+      - "        &fPlugin by: &cPavlyi"
+      - ""
+      - " &f&m-------------------------------"
+      - ""
 
-        info:
-        - ""
-        - " &f&m-------------------------------"
-        - "            &cAuthTools"
-        - ""
-        - " &f- &cPlayer: &f%player%"
-        - " &f- &cUUID: &f%uuid%"
-        - " &f- &cIP: &f%ip%"
-        - " &f- &cEmail: &f%email%"
-        - " &f- &c2FA: &f%2fa%"
-        - " &f- &c2FA Secret: &f%2fa_secret%"
-        - " &f- &c2FA Recovery Code: &f%2fa_recoverycode%"
-        - ""
-        - "        &fPlugin by: &cPavlyi"
-        - ""
-        - " &f&m-------------------------------"
-        - ""
+    info:
+      - ""
+      - " &f&m-------------------------------"
+      - "            &cAuthTools"
+      - ""
+      - " &f- &cPlayer: &f%player%"
+      - " &f- &cUUID: &f%uuid%"
+      - " &f- &cIP: &f%ip%"
+      - " &f- &cEmail: &f%email%"
+      - " &f- &c2FA: &f%2fa%"
+      - " &f- &c2FA Secret: &f%2fa_secret%"
+      - " &f- &c2FA Recovery Code: &f%2fa_recoverycode%"
+      - ""
+      - "        &fPlugin by: &cPavlyi"
+      - ""
+      - " &f&m-------------------------------"
+      - ""
 
-        reloadusage: "&f[&cAuthTools&f] &fUsage: &c/authtools reload"
-        aboutusage: "&f[&cAuthTools&f] &fUsage: &c/authtools about"
-        resetusage: "&f[&cAuthTools&f] &fUsage: &c/authtools reset <player> [2fa/mail]"
-        backendusage: "&f[&cAuthTools&f] &fUsage: &c/authtools backend <type>"
-        infousage: "&f[&cAuthTools&f] &fUsage: &c/authtools info <player>"
-        setspawnusage: "&f[&cAuthTools&f] &fUsage: &c/authtools setspawn"
-        setlobbyusage: "&f[&cAuthTools&f] &fUsage: &c/authtools setlobby"
-        setspawn: "&f[&cAuthTools&f] &cSpawn &flocation has been setted up!"
-        setlobby: "&f[&cAuthTools&f] &cLobby &flocation has been setted up!"
-        importusage: "&f[&cAuthTools&f] &fUsage: &c/authtools import <backend>"
+    reloadusage: '&f[&cAuthTools&f] Usage: &c/authtools reload'
+    aboutusage: '&f[&cAuthTools&f] Usage: &c/authtools about'
+    resetusage: '&f[&cAuthTools&f] Usage: &c/authtools reset <player> [2fa/mail]'
+    backendusage: '&f[&cAuthTools&f] Usage: &c/authtools backend <type>'
+    infousage: '&f[&cAuthTools&f] Usage: &c/authtools info <player>'
+    setspawnusage: '&f[&cAuthTools&f] Usage: &c/authtools setspawn'
+    setlobbyusage: '&f[&cAuthTools&f] Usage: &c/authtools setlobby'
+    setspawn: '&f[&cAuthTools&f] &cSpawn &flocation has been setted up!'
+    setlobby: '&f[&cAuthTools&f] &cLobby &flocation has been setted up!'
+    importusage: '&f[&cAuthTools&f] Usage: &c/authtools import <backend>'
 
-        reset:
-            playerDoesntHave2FAenabled: "&f[&cAuthTools&f] &c%player% &fdoesn't have &c2FA &fenabled!"
-            disabled2FA: "&f[&cAuthTools&f] &c%player%'s 2FA &fhas been disabled!"
-        
-        backend:
-            alreadyConnected: "&f[&cAuthTools&f] &c%connectionType% &fis already connected!"
-            switchedToConnection: "&f[&cAuthTools&f] &fSucessfully switched to &c%connectionType%&f!"
-            couldntSwitchConnection: "&f[&cAuthTools&f] &fCouldn't switch to &c%connectionType%&f!"
-            wrongConnectionType: "&f[&cAuthTools&f] &c%connectionType% &fis not a right connection type! Enter &cYAML&f, &cMYSQL &for &cSQLITE&f!"
+    reset:
+      playerDoesntHave2FAenabled: '&f[&cAuthTools&f] &c%player% &fdoesn''t have &c2FA &fenabled!'
+      playerDoesntHaveEmailEnabled: '&f[&cAuthTools&f] &c%player% &fdoesn''t have &cemail &fenabled!'
+      disabled2FA: '&f[&cAuthTools&f] &c%player%''s 2FA &fhas been disabled!'
+      disabledEmail: '&f[&cAuthTools&f] &c%player%''s email &fhas been disabled!'
 
-        import:
-            sucessfullyImported: "&f[&cAuthTools&f] &c%importedType% &fhas been successfully imported to &c%currentBackend%&f!"
-            errorWhileImporting: "&f[&cAuthTools&f] &fError while importing backends!"
-            incorrectType: "&f[&cAuthTools&f] &fIncorrect type!"
+    backend:
+      alreadyConnected: '&f[&cAuthTools&f] &c%connectionType% &fis already connected!'
+      switchedToConnection: '&f[&cAuthTools&f] Sucessfully switched to &c%connectionType%&f!'
+      couldntSwitchConnection: '&f[&cAuthTools&f] Couldn''t switch to &c%connectionType%&f!'
+      wrongConnectionType: '&f[&cAuthTools&f] &c%connectionType% &fis not a right connection type! Enter &cYAML&f,
+  &cMYSQL &for &cSQLITE&f!'
 
-    2fa:
-        setup:
-            authApp:
-            - "&f[&cAuthTools&f] &fYour &ckey &fis &c%secretkey%"
-            - "&f[&cAuthTools&f] &fEnter the &ckey &for scan the &cQR Code &fto your Authenticator app!"
-            - "&f[&cAuthTools&f] &fAfter adding the &ckey &fto Authenticator app, write a code in to the chat (ex. 123456)"
-            - "&f[&cAuthTools&f] &c&lWARNING: &fYour &cRecovery Code &fis &c%recoverycode%&f. Write the code somewhere safe incase you lose access to &cAuthenticator&f."
+    import:
+      sucessfullyImported: '&f[&cAuthTools&f] &c%importedType% &fhas been successfully imported to &c%currentBackend%&f!'
+      errorWhileImporting: '&f[&cAuthTools&f] Error while importing backends!'
+      incorrectType: '&f[&cAuthTools&f] &Incorrect type!'
 
-            alreadyRegistered: "&f[&cAuthTools&f] &c2FA &fis already turned on!"
+  2fa:
+    setup:
+      authApp:
+        - "&f[&cAuthTools&f] Your &ckey &fis &c%secretkey%"
+        - "&f[&cAuthTools&f] Enter the &ckey &for scan the &cQR Code &fto your Authenticator app!"
+        - "&f[&cAuthTools&f] After adding the &ckey &fto Authenticator app, write a code in to the chat (ex. 123456)"
+        - "&f[&cAuthTools&f] &c&lWARNING: &fYour &cRecovery Code &fis &c%recoverycode%&f. Write the code somewhere safe incase you lose access to &cAuthenticator&f."
 
-            enabled: "&f[&cAuthTools&f] &c2FA &fhas been &aenabled&f!"
-            disabled: "&f[&cAuthTools&f] &c2FA &fhas been &cdisabled&f!"
+      alreadyRegistered: '&f[&cAuthTools&f] &c2FA &fis already turned on!'
 
-            setupCancelled: "&f[&cAuthTools&f] &c2FA &fsetup was cancelled!"
-            invalidCode: "&f[&cAuthTools&f] &fInvalid code!"
+      enabled: '&f[&cAuthTools&f] &c2FA &fhas been &aenabled&f!'
+      disabled: '&f[&cAuthTools&f] &c2FA &fhas been &cdisabled&f!'
 
-            qrcode:
-                title: "&c2FA QR Code"
-                lore:
-                - "&fScan this &cQR Code &fto your &cAuthenticator &fapp."
+      setupCancelled: '&f[&cAuthTools&f] &c2FA &fsetup was cancelled!'
+      invalidCode: '&f[&cAuthTools&f] Invalid code!'
 
-        recover:
-            usage: "&f[&cAuthTools&f] &fUsage: &c/2fa recover <recoverCode>"
-            invalidRecoveryCode: "&f[&cAuthTools&f] &fInvalid recovery code!"
-            recovered: "&f[&cAuthTools&f] &fSucessful recover! &fDisabling &c2FA&f!"
-            2faDisabled: "&f[&cAuthTools&f] &fYou need to have &c2FA &fenabled!"
+      qrcode:
+        title: '&c2FA QR Code'
+        lore:
+          - "&fScan this &cQR Code &fto your &cAuthenticator &fapp."
 
-        login:
-            loginMessage: "&f[&cAuthTools&f] &fEnter your &c2FA code &ffrom the &cAuthenticator app&f!\n&f[&cAuthTools&f] Lost access to &cauthenticator app&f?\n&f[&cAuthTools&f] &fUse &c/2fa recover <recovery code>"
-            loggedIn: "&f[&cAuthTools&f] &fSucessfully unlocked account!"
-            alreadyLoggedIn: "&f[&cAuthTools&f] &fYour account is already unlocked!"
-            timedOut: "&cTime to authenticate has timed out!"
-            deniedCommand: "&f[&cAuthTools&f] &fYou're not allowed to perform commands!"
-            wrongCodeKick: "&cWrong code."
-            playerIsOnlineKick: "&cPlayer with the same name is on the server!"
+    recover:
+      usage: '&f[&cAuthTools&f] Usage: &c/2fa recover <recoverCode>'
+      invalidRecoveryCode: '&f[&cAuthTools&f] Invalid recovery code!'
+      recovered: '&f[&cAuthTools&f] Sucessful recover! Disabling &c2FA&f!'
+      2faDisabled: '&f[&cAuthTools&f] You need to have &c2FA &fenabled!'
 
-config-version: 1.7
+    login:
+      loginMessage: '&f[&cAuthTools&f] Enter your &c2FA code &ffrom the &cAuthenticator app&f!\n&f[&cAuthTools&f]
+  Lost access to &cauthenticator app&f?\n&f[&cAuthTools&f] Use &c/recover'
+      loggedIn: '&f[&cAuthTools&f] Sucessfully unlocked account!'
+      alreadyLoggedIn: '&f[&cAuthTools&f] Your account is already unlocked!'
+      timedOut: '&cTime to authenticate has timed out!'
+      deniedCommand: '&f[&cAuthTools&f] You''re not allowed to perform commands!'
+      wrongCodeKick: '&cWrong code.'
+      playerIsOnlineKick: '&cPlayer with the same name is on the server!'
+
+  recover:
+    usage: '&f[&cAuthTools&f] Usage: &c/recover <email/code>'
+    usageCode: '&f[&cAuthTools&f] Usage: &c/recover <code> <recoveryCode>'
+    haveToRegister: '&f[&cAuthTools&f] You have to register before using this command!'
+
+    email:
+      notSet: '&f[&cAuthTools&f] You haven''t set up your recovery email! Set it up using &c/auth&f!'
+      # %emailMasked% shows player's email address masked (ex. from example@example.com to exa***@example.com)
+      # %email% shows player's email address (ex. example@example.com)
+      sent: '&f[&cAuthTools&f] Email has been sent to &c%emailMasked%&f!'
+      sending: '&f[&cAuthTools&f] Sending email...'
+      failedToSend: '&f[&cAuthTools&f] An email has failed to send, please contact the administrator!'
+
+    code:
+
+
+  auth:
+    usage: '&f[&cAuthTools&f] &fUsage: &c/auth'
+
+    # %emailMasked% shows player's email address masked (ex. from example@example.com to exa***@example.com)
+    # %email% shows player's email address (ex. example@example.com)
+    # %changeEmail% shows only if player has setted up an email address
+    info:
+      - ""
+      - " &f&m-------------------------------"
+      - "            &cAccount Information"
+      - ""
+      - "   &c&lEmail:"
+      - "     &fStatus: &c%emailStatus%"
+      - "     &fAddress: &c%emailMasked%"
+      - "     %changeEmail%"
+      - ""
+      - " &f&m-------------------------------"
+      - ""
+
+    email:
+      enterAddress: '&f[&cAuthTools&f] Please, enter your email address!'
+      alreadySettedUp: '&f[&cAuthTools&f] You have already setted up an email address!'
+      alreadySettingUp: '&f[&cAuthTools&f] You are already in a setup proccess!'
+      invalidAddress: '&f[&cAuthTools&f] You have entered invalid email address!'
+      invalidVerificationCode: '&f[&cAuthTools&f] Invalid verification code!'
+      success: '&f[&cAuthTools&f] Email has been sucessfully verified!'
+      sending: '&f[&cAuthTools&f] Sending an email, please wait a while!'
+      sent: '&f[&cAuthTools&f] Email has been sucessfully sent! Please, enter the verification code from the email!'
+      error: '&f[&cAuthTools&f] While sending an email an error occurred, please contact!'
+
+
+    placeholders:
+      email:
+        status:
+          setup: '&c&nSetup'
+          settingup: '&6&nSetting up'
+          enabled: '&aEnabled'
+        address:
+          notsetup: '&cNone'
+        changeEmail: '&c&nChange Email'

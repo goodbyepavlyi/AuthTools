@@ -3,19 +3,20 @@ package pavlyi.authtools.spigot.events;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import pavlyi.authtools.spigot.handlers.User;
+import pavlyi.authtools.spigot.authentication.User;
+import pavlyi.authtools.spigot.storages.Variables;
 
 public class AsyncRegisterEvent extends Event {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
 
     private final Player player;
     private final User user;
-    private String code;
-    private String secretKey;
+    private final String code;
+    private final String secretKey;
 
     public AsyncRegisterEvent(Player player, String code, String secretKey) {
         this.player = player;
-        this.user = new User(player.getName());
+        this.user = Variables.getUser(player.getUniqueId());
         this.code = code;
         this.secretKey = secretKey;
     }

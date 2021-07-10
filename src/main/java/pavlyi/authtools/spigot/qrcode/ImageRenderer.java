@@ -29,10 +29,10 @@ public class ImageRenderer extends MapRenderer {
 
         if (this.cacheImage.get() != null) {
             canvas.drawImage(0, 0, this.cacheImage.get());
-		}
+        }
 
-		this.hasRendered = true;
-	}
+        this.hasRendered = true;
+    }
 
     public BufferedImage getImage(String url) throws IOException {
         boolean useCache = ImageIO.getUseCache();

@@ -32,7 +32,7 @@ connection:
     # MySQL password
     password: password
     # MySQL options
-    options: "?autoReconnect=true&useSSL=false&serverTimezone=UTC"
+    options: '?autoReconnect=true&useSSL=false&serverTimezone=UTC'
 
   mongodb:
     # MongoDB cluster
@@ -60,17 +60,27 @@ hook:
 
 qrcode:
   # Here you can enter anything to show in Authenticator App.
-  name: "Minecraft Server"
+  name: 'Minecraft Server'
 
 settings:
   # Send player to BungeeCord server after register/login.
   # Leave blank if you want to disable this feature.
   sendPlayerTo: ''
 
+  session:
+    # Do you want to enable the session feature?
+    # If enabled, when a player authenticates successfully, his IP and his name is saved.
+    # The next time the player joins the server, if his IP is the same as last time
+    # and the timeout hasn't expired, he will not need to authenticate.
+    enable: false
+    # After how many minutes should a session expire?
+    # A player's session ends after the timeout or if his IP has changed
+    timeout: 30
+
   restrictions:
     # Allowed commands to do even when not logged in
     allowedCommands:
-      - "2fa recover"
+      - '2fa recover'
     # After how many seconds should players who fail to login or register be kicked?
     # Set to 0 to disable.
     timeout: 30
@@ -86,6 +96,19 @@ settings:
     # How far can players walk?
     # Set to 0 for unlimited radius
     allowedMovementRadius: 100
+
+  # Settings for the account recovery
+  recovery:
+    email:
+      authentication:
+        # Email SMTP server host
+        smtp: smtp.gmail.com
+        # Email SMTP server port
+        port: 465
+        # Email account address
+        address: ''
+        # Email account password
+        password: ''
 
   announcement:
     title:
@@ -124,14 +147,12 @@ settings:
       useInLogin: true
 
     register:
-      title: ""
-      subtitle: ""
-      actionbar: "&cRegister &f- Enter &csecret key &finto &capp &for scan the &cQR Code&f!"
+      title: ''
+      subtitle: ''
+      actionbar: '&cRegister &f- Enter &csecret key &finto &capp &for scan the &cQR Code&f!'
 
     login:
-      title: "&c&lLogin"
-      subtitle: ""
-      actionbar: "&fEnter &cverification code &ffrom &cAuthenticator app&f!"
-      actionbars: "1&fEnter &cverification code &ffrom &cAuthenticator app&f!"
-
-config-version: 1.7
+      title: '&c&lLogin'
+      subtitle: ''
+      actionbar: '&fEnter &cverification code &ffrom &cAuthenticator app&f!'
+      actionbars: '&fEnter &cverification code &ffrom &cAuthenticator app&f!'

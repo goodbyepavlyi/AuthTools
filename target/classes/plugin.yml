@@ -4,21 +4,49 @@ author: Pavlyi
 website: https://www.pavlyi.eu/
 
 main: pavlyi.authtools.spigot.AuthTools
-version: 1.7
+version: 1.8
 
 api-version: 1.13
 load: POSTWORLD
 
-softdepend: [nLogin, AuthMe]
-
 commands:
-    authtools:
-        description: Command for controlling the whole plugin
-        permission: authtools.command.use
+  authtools:
+    description: Command for controlling AuthTools
+    permission: authtools.command.use
 
-    2fa:
-        description: Command for controlling the 2FA.
+  2fa:
+    description: Command for controlling 2FA.
+    aliases: [ tfa, totp ]
+
+  recover:
+    description: Command for recovering account
+    aliases: [ recovery ]
+
+  auth:
+    description: Command for controlling account
 
 permissions:
-    authtools.*:
-        children:
+  authtools.*:
+    description: Gives access to all commands
+    children:
+      authtools.use: true
+      authtools.use.reload: true
+      authtools.use.about: true
+      authtools.use.reset: true
+      authtools.use.backend: true
+      authtools.use.info: true
+      authtools.use.setspawn: true
+      authtools.use.setlobby: true
+      authtools.use.import: true
+  authtools.use.*:
+    description: Gives access to all commands
+    children:
+      authtools.use: true
+      authtools.use.reload: true
+      authtools.use.about: true
+      authtools.use.reset: true
+      authtools.use.backend: true
+      authtools.use.info: true
+      authtools.use.setspawn: true
+      authtools.use.setlobby: true
+      authtools.use.import: true

@@ -49,8 +49,8 @@ public class Updater {
 
             scanner.close();
             connection.disconnect();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
     }
 
@@ -83,8 +83,8 @@ public class Updater {
                 exception.printStackTrace();
                 return null;
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
 
         return null;

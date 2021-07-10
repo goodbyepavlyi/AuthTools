@@ -3,21 +3,22 @@ package pavlyi.authtools.spigot.events;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import pavlyi.authtools.spigot.authentication.User;
 import pavlyi.authtools.spigot.enums.InformationType;
-import pavlyi.authtools.spigot.handlers.User;
+import pavlyi.authtools.spigot.storages.Variables;
 
 public class AsyncRecoverEvent extends Event {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
 
-    private Player player;
-    private User user;
+    private final Player player;
+    private final User user;
+    private final boolean sucessfullRecover;
+    private final InformationType resettedType;
     private int recoveryCode;
-    private boolean sucessfullRecover;
-    private InformationType resettedType;
 
     public AsyncRecoverEvent(Player player, int recoveryCode, boolean sucessfullRecover, InformationType resettedType) {
         this.player = player;
-        this.user = new User(player.getName());
+        this.user = Variables.getUser(player.getUniqueId());
         this.sucessfullRecover = sucessfullRecover;
         this.resettedType = resettedType;
     }

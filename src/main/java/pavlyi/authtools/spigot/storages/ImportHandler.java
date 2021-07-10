@@ -7,7 +7,6 @@ import pavlyi.authtools.spigot.connections.MySQL;
 import pavlyi.authtools.spigot.connections.SQLite;
 import pavlyi.authtools.spigot.connections.YAMLConnection;
 import pavlyi.authtools.spigot.enums.ConnectionType;
-import pavlyi.authtools.spigot.handlers.VariablesHandler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,7 +28,7 @@ public class ImportHandler {
 
 
     public ImportHandler(ConnectionType importFrom) {
-        this.connectionType = VariablesHandler.getConnectionType();
+        this.connectionType = Variables.getConnectionType();
         this.importFrom = importFrom;
 
         this.name = new ArrayList<>();
@@ -60,8 +59,8 @@ public class ImportHandler {
                         }
 
                         rs.close();
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
+                    } catch (SQLException exception) {
+                        exception.printStackTrace();
                         return false;
                     }
 
@@ -74,8 +73,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -87,8 +86,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -100,8 +99,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -113,8 +112,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -126,8 +125,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -139,8 +138,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -152,8 +151,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -184,8 +183,8 @@ public class ImportHandler {
                         }
 
                         rs.close();
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
+                    } catch (SQLException exception) {
+                        exception.printStackTrace();
                         return false;
                     }
 
@@ -198,8 +197,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -211,8 +210,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -224,8 +223,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -237,8 +236,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -250,8 +249,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -263,8 +262,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -276,8 +275,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -289,8 +288,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -417,8 +416,8 @@ public class ImportHandler {
                         }
 
                         rs.close();
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
+                    } catch (SQLException exception) {
+                        exception.printStackTrace();
                         return false;
                     }
 
@@ -431,8 +430,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -444,8 +443,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -457,8 +456,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -470,8 +469,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -483,8 +482,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -496,8 +495,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -509,8 +508,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -615,8 +614,8 @@ public class ImportHandler {
                         }
 
                         rs.close();
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
+                    } catch (SQLException exception) {
+                        exception.printStackTrace();
                         return false;
                     }
 
@@ -629,8 +628,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -642,8 +641,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -655,8 +654,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -668,8 +667,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -681,8 +680,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -694,8 +693,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -707,8 +706,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -769,8 +768,8 @@ public class ImportHandler {
                         }
 
                         rs.close();
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
+                    } catch (SQLException exception) {
+                        exception.printStackTrace();
                         return false;
                     }
 
@@ -783,8 +782,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -796,8 +795,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -809,8 +808,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -822,8 +821,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -835,8 +834,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -848,8 +847,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -861,8 +860,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -906,8 +905,8 @@ public class ImportHandler {
                         }
 
                         rs.close();
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
+                    } catch (SQLException exception) {
+                        exception.printStackTrace();
                         return false;
                     }
 
@@ -920,8 +919,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -933,8 +932,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -946,8 +945,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -959,8 +958,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -972,8 +971,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -985,8 +984,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 
@@ -998,8 +997,8 @@ public class ImportHandler {
                             }
 
                             rs.close();
-                        } catch (SQLException ex) {
-                            ex.printStackTrace();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                             return false;
                         }
 

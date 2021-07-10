@@ -7,8 +7,8 @@ import java.sql.*;
 public class SQLite {
     private final AuthTools instance = AuthTools.getInstance();
 
-    public Connection con;
-    public Statement st;
+    public Connection connection;
+    public Statement statement;
 
     public boolean connect(boolean silent) {
         try {
@@ -24,24 +24,24 @@ public class SQLite {
                 if (instance.getConfigHandler().CONNECTION_SQLITE_FILENAME != null && instance.getConfigHandler().CONNECTION_SQLITE_FILENAME.endsWith(".db"))
                     fileName = instance.getConfigHandler().CONNECTION_SQLITE_FILENAME;
 
-                con = DriverManager.getConnection("jdbc:sqlite:" + instance.getDataFolder() + "/" + fileName);
-                st = con.createStatement();
+                connection = DriverManager.getConnection("jdbc:sqlite:" + instance.getDataFolder() + "/" + fileName);
+                statement = connection.createStatement();
 
                 if (!silent)
                     instance.log("&r  &aSuccess: &cSQLite &fhas been created and loaded!");
 
                 createTable(silent);
                 return true;
-            } catch (SQLException ex) {
+            } catch (SQLException exception) {
                 instance.log("&r  &cError: &cSQLite &fcouldn't create!");
-                ex.printStackTrace();
+                exception.printStackTrace();
 
                 return false;
             }
 
-        } catch (Exception ex) {
+        } catch (Exception exception) {
             instance.log("&r  &cError: &cDriver &ffor &cSQLite &fhasn't been found!");
-            ex.printStackTrace();
+            exception.printStackTrace();
 
             instance.getPluginManager().disablePlugin(instance);
 
@@ -51,45 +51,50 @@ public class SQLite {
 
     public void createTable(boolean silent) {
         try {
-            con.createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS authtools(name VARCHAR(64), uuid VARCHAR(64), ip VARCHAR(64), email VARCHAR(64), tfa boolean, tfaSecret VARCHAR(64), tfaRecoveryCode int, tfaSettingUp boolean);");
+            getConnection().createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS authtools(name VARCHAR(255), uuid VARCHAR(255), password VARCHAR (255), ip VARCHAR(255), email VARCHAR(255), tfa boolean, tfaSecret VARCHAR(255), tfaRecoveryCode int);");
+            getConnection().createStatement().executeUpdate("ALTER TABLE authtools ADD password VARCHAR (255) NOT NULL;");
 
             if (!silent)
                 instance.log("&r  &aSuccess: &fCreated tables for &cSQLite&f!");
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        } catch (SQLException exception) {
             instance.log("&r  &cError: &cSQLite &fcouldn't create a tables!");
+            exception.printStackTrace();
         }
     }
 
     public void disconnect(boolean silent) {
         try {
-            con.close();
+            getConnection().close();
 
             if (!silent)
                 instance.log("&r  &aSuccess: &cSQLite &fhas been unloaded!");
-        } catch (SQLException ex) {
+        } catch (SQLException exception) {
             instance.log("&r  &cError: &cSQLite &fcouldn't had been unloaded!");
-            ex.printStackTrace();
+            exception.printStackTrace();
         }
     }
 
     public void update(String qry) {
         try {
-            con.createStatement().executeUpdate(qry);
-        } catch (SQLException ex) {
+            getConnection().createStatement().executeUpdate(qry);
+        } catch (SQLException exception) {
             instance.log("&r  &cError: &cSQLite &fcouldn't update data in table!");
-            ex.printStackTrace();
+            exception.printStackTrace();
         }
     }
 
     public ResultSet getResult(String qry) {
         try {
-            return con.createStatement().executeQuery(qry);
-        } catch (SQLException ex) {
+            return getConnection().createStatement().executeQuery(qry);
+        } catch (SQLException exception) {
             instance.log("&r  &cError: &cSQLite &fcouldn't get a result!");
-            ex.printStackTrace();
+            exception.printStackTrace();
 
             return null;
         }
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 }

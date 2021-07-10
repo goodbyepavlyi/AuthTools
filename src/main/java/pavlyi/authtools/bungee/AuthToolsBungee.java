@@ -1,11 +1,5 @@
 package pavlyi.authtools.bungee;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Scanner;
-
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -14,143 +8,144 @@ import pavlyi.authtools.bungee.listeners.BungeeMessageListener;
 import pavlyi.authtools.bungee.listeners.BungeePlayerListener;
 import pavlyi.authtools.spigot.Updater;
 
+import java.util.ArrayList;
+
 public class AuthToolsBungee extends Plugin {
-	private static AuthToolsBungee instance;
-	private PluginManager pluginManager;
-	private ConfigHandler configHandler;
+    private static AuthToolsBungee instance;
+    boolean printDisableMessage;
+    private PluginManager pluginManager;
+    private ConfigHandler configHandler;
+    private ArrayList<String> authLocked;
 
-	private ArrayList<String> authLocked;
-	boolean printDisableMessage;
+    public static void main(String[] args) {
+        System.out.println("You need to run this plugin in BungeeCord server!");
+    }
 
-	public void onEnable() {
-		instance = this;
-		pluginManager = getProxy().getPluginManager();
-		configHandler = new ConfigHandler();
+    public static AuthToolsBungee getInstance() {
+        return instance;
+    }
 
-		authLocked = new ArrayList<>();
+    public void onEnable() {
+        instance = this;
+        pluginManager = getProxy().getPluginManager();
+        configHandler = new ConfigHandler();
 
-		log("&f&m-------------------------");
-		log("&r  &cAuthToolsBungee &fv"+getDescription().getVersion());
-		log("&r  &cAuthor: &f"+getDescription().getAuthor());
-		log("&r  &cWebsite: &fhttps://pavlyi.eu");
-		log("");
+        authLocked = new ArrayList<>();
 
-		Updater updater = new Updater(getDescription().getVersion());
-		updater.checkForUpdate();
-		switch (updater.getResult()) {
-			case UPDATE_FOUND:
-				String downloadUrl = updater.getDownloadURL();
+        log("&f&m-------------------------");
+        log("&r  &cAuthToolsBungee &fv" + getDescription().getVersion());
+        log("&r  &cAuthor: &f" + getDescription().getAuthor());
+        log("&r  &cWebsite: &fhttps://pavlyi.eu");
+        log("");
 
-				if (downloadUrl == null)
-					downloadUrl = "Link not found";
+        Updater updater = new Updater(getDescription().getVersion());
+        updater.checkForUpdate();
+        switch (updater.getResult()) {
+            case UPDATE_FOUND:
+                String downloadUrl = updater.getDownloadURL();
 
-				log("&r  &cWarning: &fYour plugin is outdated please update the plugin! &c(&f" + downloadUrl + "&c)");
+                if (downloadUrl == null)
+                    downloadUrl = "Link not found";
 
-				break;
+                log("&r  &cWarning: &fYour plugin is outdated please update the plugin! &c(&f" + downloadUrl + "&c)");
 
-			case BAD_ID:
-				log("&r  &cError: &fAn error occurred while looking for a resource on Spigot!");
-				break;
+                break;
 
-			case NO_UPDATE:
-				log("&r  &aInfo: &fYour plugin is up-to-date!");
-				break;
-		}
+            case BAD_ID:
+                log("&r  &cError: &fAn error occurred while looking for a resource on Spigot!");
+                break;
 
-		getConfigHandler().create();
+            case NO_UPDATE:
+                log("&r  &aInfo: &fYour plugin is up-to-date!");
+                break;
+        }
 
-		String configCheck = getConfigHandler().check();
-		if (configCheck != null) {
-			log("&r  &cError: &fInvalid config!");
-			log("&r         &fThe plugin has been &cdisabled&f, because there is missing content in the messages,");
-			log("&r         &fmissing line \"&c" + configCheck + "&f\"");
-			log("&f&m-------------------------");
+        getConfigHandler().create();
 
-			printDisableMessage = true;
-			onDisable();
+        String configCheck = getConfigHandler().check();
+        if (configCheck != null) {
+            log("&r  &cError: &fInvalid config!");
+            log("&r         &fThe plugin has been &cdisabled&f, because there is missing content in the messages,");
+            log("&r         &fmissing line \"&c" + configCheck + "&f\"");
+            log("&f&m-------------------------");
 
-			return;
-		}
+            printDisableMessage = true;
+            onDisable();
 
-		getConfigHandler().load();
+            return;
+        }
 
-		try {
-			getPluginManager().registerListener(this, new BungeeMessageListener());
-		} catch (Exception ex) {
-			log("&r  &cError: &fListener &cBungeeMessageListener &fcouldn't get registered!");
-			ex.printStackTrace();
-		}
+        getConfigHandler().load();
 
-		try {
-			getPluginManager().registerListener(this, new BungeePlayerListener());
-		} catch (Exception ex) {
-			log("&r  &cError: &fListener &cBungeePlayerListener &fcouldn't get registered!");
-			ex.printStackTrace();
-		}
+        try {
+            getPluginManager().registerListener(this, new BungeeMessageListener());
+        } catch (Exception ex) {
+            log("&r  &cError: &fListener &cBungeeMessageListener &fcouldn't get registered!");
+            ex.printStackTrace();
+        }
 
-		log("&f&m-------------------------");
-	}
+        try {
+            getPluginManager().registerListener(this, new BungeePlayerListener());
+        } catch (Exception ex) {
+            log("&r  &cError: &fListener &cBungeePlayerListener &fcouldn't get registered!");
+            ex.printStackTrace();
+        }
 
-	public void onDisable() {
-		if (!printDisableMessage) {
-			log("&f&m-------------------------");
-			log("&r  &cAuthToolsBungee &fv"+getDescription().getVersion());
-			log("&r  &cAuthor: &f"+getDescription().getAuthor());
-			log("&r  &cWebsite: &fhttps://pavlyi.eu");
-			log("");
+        log("&f&m-------------------------");
+    }
 
-			Updater updater = new Updater(getDescription().getVersion());
-			updater.checkForUpdate();
-			switch (updater.getResult()) {
-				case UPDATE_FOUND:
-					String downloadUrl = updater.getDownloadURL();
+    public void onDisable() {
+        if (!printDisableMessage) {
+            log("&f&m-------------------------");
+            log("&r  &cAuthToolsBungee &fv" + getDescription().getVersion());
+            log("&r  &cAuthor: &f" + getDescription().getAuthor());
+            log("&r  &cWebsite: &fhttps://pavlyi.eu");
+            log("");
 
-					if (downloadUrl == null)
-						downloadUrl = "Link not found";
+            Updater updater = new Updater(getDescription().getVersion());
+            updater.checkForUpdate();
+            switch (updater.getResult()) {
+                case UPDATE_FOUND:
+                    String downloadUrl = updater.getDownloadURL();
 
-					log("&r  &cWarning: &fYour plugin is outdated please update the plugin! &c(&f" + downloadUrl + "&c)");
+                    if (downloadUrl == null)
+                        downloadUrl = "Link not found";
 
-					break;
+                    log("&r  &cWarning: &fYour plugin is outdated please update the plugin! &c(&f" + downloadUrl + "&c)");
 
-				case BAD_ID:
-					log("&r  &cError: &fAn error occurred while looking for a resource on Spigot!");
-					break;
+                    break;
 
-				case NO_UPDATE:
-					log("&r  &aInfo: &fYour plugin is up-to-date!");
-					break;
-			}
+                case BAD_ID:
+                    log("&r  &cError: &fAn error occurred while looking for a resource on Spigot!");
+                    break;
 
-			log("&r  &aSuccess: &cPlugin &fhas been disabled!");
-			log("&f&m-------------------------");
-		}
-	}
+                case NO_UPDATE:
+                    log("&r  &aInfo: &fYour plugin is up-to-date!");
+                    break;
+            }
 
-	public static void main(String[] args) {
-		System.out.println("You need to run this plugin in BungeeCord server!");
-	}
+            log("&r  &aSuccess: &cPlugin &fhas been disabled!");
+            log("&f&m-------------------------");
+        }
+    }
 
-	public String color(String message) {
-		return ChatColor.translateAlternateColorCodes('&', message);
-	}
+    public String color(String message) {
+        return ChatColor.translateAlternateColorCodes('&', message);
+    }
 
-	public void log(String message) {
-		getProxy().getConsole().sendMessage(TextComponent.fromLegacyText(color("&f[&cAuthToolsBungee&f] "+message)));
-	}
+    public void log(String message) {
+        getProxy().getConsole().sendMessage(TextComponent.fromLegacyText(color("&f[&cAuthToolsBungee&f] " + message)));
+    }
 
-	public static AuthToolsBungee getInstance() {
-		return instance;
-	}
-	
-	public PluginManager getPluginManager() {
-		return pluginManager;
-	}
-	
-	public ConfigHandler getConfigHandler() {
-		return configHandler;
-	}
+    public PluginManager getPluginManager() {
+        return pluginManager;
+    }
 
-	public ArrayList<String> getAuthLocked() {
-		return authLocked;
-	}
+    public ConfigHandler getConfigHandler() {
+        return configHandler;
+    }
+
+    public ArrayList<String> getAuthLocked() {
+        return authLocked;
+    }
 }
