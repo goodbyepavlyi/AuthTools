@@ -1,16 +1,16 @@
 <p align="center">
-  <img width="auto" height="auto" src="https://i.imgur.com/hZ7P3Lw.png" alt="Introduction">
+  <img width="auto" height="auto" src="https://i.imgur.com/WLDVRcm.png" alt="Introduction">
 </p>
 <br />
 
-![Description](https://i.imgur.com/T5O7TYV.png)
+![Description](https://i.imgur.com/DVVg8ot.png)
 
 * **AuthTools adds a security layer on your server that keeps player accounts secure!**
 * **AuthTools disallows players who aren't authenticated to do actions like placing blocks, moving, typing commands, or
   using the inventory.**
   <br />
 
-![Features](https://i.imgur.com/edH29NJ.png)
+![Features](https://i.imgur.com/IsN32Ju.png)
 * **Disables the "Logged in from another location" kick.**
 * **Fully customizable messages.**
 * **YAML, MySQL, SQLite, and MongoDB backend support.**
@@ -26,16 +26,15 @@
 * **Recovery through Email or Recovery code in case of lost authenticator.**
 <br />
  
-![Wiki](https://i.imgur.com/D8RPaEd.png)
+![Wiki](https://i.imgur.com/60s306k.png)
 
-* **[Home Page](https://github.com/pavlyi1/AuthTools/wiki)**
-* **[Configuration](https://github.com/pavlyi1/AuthTools/wiki/Configuration)**
-* **[Messages](https://github.com/pavlyi1/AuthTools/wiki/Messages)**
-* **[Registration Types](https://github.com/pavlyi1/AuthTools/wiki/Registration)**
-* **[API and Events](https://docs.pavlyi.eu/)**
-  <br />
+* **[Home Page](https://github.com/goodbyepavlyi/AuthTools/wiki)**
+* **[Configuration](https://github.com/goodbyepavlyi/AuthTools/wiki/Configuration)**
+* **[Messages](https://github.com/goodbyepavlyi/AuthTools/wiki/Messages)**
+* **[Registration Types](https://goodbyepavlyi.com/goodbyepavlyi/AuthTools/wiki/Registration)**
+<br />
 
-![Terms of Conditions](https://i.imgur.com/QARKOhw.png)
+![Terms of Conditions](https://i.imgur.com/pdQZ8Di.png)
 
 * **Only report bugs or any other suggestions via PM.**
 * **No stupid reviews, such as the developer isn't adding features I request.**
